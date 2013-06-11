@@ -1,0 +1,35 @@
+name: ${project.name}
+version: ${project.version}
+description: ${project.description}
+author: ${project.organization.name}
+website: ${project.organization.url}
+
+main: ${mainClass}
+depend: [Vault]
+load: POSTWORLD
+
+commands:
+   lore:
+      usage: /<command> [argument]
+      permission: lore.set
+
+permissions:
+  lore.*:
+    description: Combines all permissions under one wildcard
+    children:
+      lore.give: true
+      lore.message: true
+      lore.set: true
+      lore.obtain: true
+  lore.give:
+    description: Any player with this node enabled will be able to give a specified player the lore book.
+    default: false
+  lore.obtain:
+    description: Any player with this node enabled will receive a book upon first joining the server.
+    default: false
+  lore.message:
+    description: Any player with this node enabled will be sent the message set in the config.yml (if message is empty, nothing will be sent)
+    default: false
+  lore.set:
+    description: Any player with this node enabled will be able to do /lore set with a book in hand and set the current lore book details as the book in hand.
+    default: false

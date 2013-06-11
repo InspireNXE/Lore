@@ -10,8 +10,7 @@ load: POSTWORLD
 
 commands:
    lore:
-      usage: /<command> [argument]
-      permission: lore.set
+      usage: /<command> [arguments]
 
 permissions:
   lore.*:

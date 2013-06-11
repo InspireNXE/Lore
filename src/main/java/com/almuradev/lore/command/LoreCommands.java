@@ -58,6 +58,7 @@ public class LoreCommands implements CommandExecutor{
 						plugin.getConfiguration().setBookContent(meta.getPages());
 
 						plugin.getConfiguration().save();
+						player.sendMessage("Book saved to config.yml");
 					} else {
 						player.sendMessage("Item in hand must be the book you want to set.");
 					}

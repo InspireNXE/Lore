@@ -58,7 +58,7 @@ public class LoreCommands implements CommandExecutor{
 						plugin.getConfiguration().setBookContent(meta.getPages());
 
 						plugin.getConfiguration().save();
-						player.sendMessage("Book saved to config.yml");
+						player.sendMessage("Book saved to config.yml.");
 					} else {
 						player.sendMessage("Item in hand must be the book you want to set.");
 					}
@@ -82,7 +82,7 @@ public class LoreCommands implements CommandExecutor{
 
 					target.getInventory().addItem(book);
 				} else {
-					player.sendMessage("That player is not online.");
+					sender.sendMessage("That player is not online.");
 				}
 			}
 			return true;

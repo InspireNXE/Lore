@@ -7,14 +7,14 @@
 	<!-- Project information -->
 	<groupId>com.almuradev</groupId>
 	<artifactId>lore</artifactId>
-	<version>1.0-SNAPSHOT</version>
+	<version>1.0.1-SNAPSHOT</version>
 	<name>Lore</name>
 	<url>http://www.almuradev.com</url>
 	<description>Lore is an administrator friendly plugin to setup and give a predefined book at login.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-		<bukkitVersion>1.5.2-R0.2-SNAPSHOT</bukkitVersion>
+		<bukkitVersion>1.6.2-R0.1-SNAPSHOT</bukkitVersion>
 		<mainClass>com.almuradev.lore.LorePlugin</mainClass>
 	</properties>
 

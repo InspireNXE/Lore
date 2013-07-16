@@ -19,7 +19,7 @@
  */
 package com.almuradev.lore.command;
 
-import java.util.List;
+import java.util.logging.Level;
 
 import com.almuradev.lore.LorePlugin;
 import com.almuradev.lore.util.VaultUtil;
@@ -48,44 +48,51 @@ public class LoreCommands implements CommandExecutor{
 				player = (Player) sender;
 			}
 
-			if (args.length > 0 && args[0].equalsIgnoreCase("set")) {
-				if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.set")) {
-					if (player.getItemInHand().getItemMeta() instanceof BookMeta) {
-						BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
+			if (args.length > 0) {
+				if (args[0].equalsIgnoreCase("set")) {
+					if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.set")) {
+						if (player.getItemInHand().getItemMeta() instanceof BookMeta) {
+							BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
 
-						plugin.getConfiguration().setBookAuthor(meta.getAuthor());
-						plugin.getConfiguration().setBookTitle(meta.getTitle());
-						plugin.getConfiguration().setBookContent(meta.getPages());
+							if (meta.getPages() != null && !meta.getPages().isEmpty()) {
+								plugin.getConfiguration().setBookAuthor(meta.getAuthor());
+								plugin.getConfiguration().setBookTitle(meta.getTitle());
+								plugin.getConfiguration().setBookContent(meta.getPages());
 
-						plugin.getConfiguration().save();
-						player.sendMessage("Book saved to config.yml.");
+								plugin.getConfiguration().save();
+								player.sendMessage("Book saved to config.yml.");
+							} else {
+								player.sendMessage("Unable to save book to config.yml, null book contents.");
+							}
+						} else {
+							player.sendMessage("Item in hand must be the book you want to set.");
+						}
 					} else {
-						player.sendMessage("Item in hand must be the book you want to set.");
+						player.sendMessage("Insufficient permissions to use that command.");
 					}
-				} else {
-					player.sendMessage("Insufficient permissions to use that command.");
+				} else if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.give") && args[0].equalsIgnoreCase("give")) {
+					Player target = Bukkit.getPlayerExact(args[1]);
+
+					if (target != null) {
+						// Do some magic
+						ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+						BookMeta meta = (BookMeta) book.getItemMeta();
+
+						meta.setAuthor(plugin.getConfiguration().getBookAuthor());
+						meta.setTitle(plugin.getConfiguration().getBookTitle());
+						meta.setPages(plugin.getConfiguration().getBookContent());
+						book.setItemMeta(meta);
+
+						target.getInventory().addItem(book);
+					} else {
+						sender.sendMessage("That player is not online.");
+					}
 				}
-			} else if (args.length > 0 && args[0].equalsIgnoreCase("give")) {
-				Player target = Bukkit.getPlayerExact(args[1]);
-
-				if (target != null) {
-					String bookAuthor = plugin.getConfiguration().getBookAuthor();
-					String bookTitle = plugin.getConfiguration().getBookTitle();
-					List<String> bookContent = plugin.getConfiguration().getBookContent();
-					ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
-					BookMeta meta = (BookMeta) book.getItemMeta();
-
-					meta.setAuthor(bookAuthor);
-					meta.setTitle(bookTitle);
-					meta.setPages(bookContent);
-					book.setItemMeta(meta);
-
-					target.getInventory().addItem(book);
-				} else {
-					sender.sendMessage("That player is not online.");
-				}
+				return true;
+			} else if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.relead") && args[0].equalsIgnoreCase("reload")) {
+				plugin.getConfiguration().init();
+				plugin.getLogger().log(Level.INFO, "Reloaded settings from config.yml.");
 			}
-			return true;
 		}
 		return false;
 	}

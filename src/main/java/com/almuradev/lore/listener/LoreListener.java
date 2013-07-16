@@ -19,13 +19,11 @@
  */
 package com.almuradev.lore.listener;
 
-import java.util.List;
 import java.util.logging.Level;
 
 import com.almuradev.lore.LorePlugin;
 import com.almuradev.lore.util.VaultUtil;
 
-import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -46,30 +44,22 @@ public class LoreListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 
-		// Get Book contents
-		String joinMessage = plugin.getConfiguration().getJoinMessage();
-		String bookAuthor = plugin.getConfiguration().getBookAuthor();
-		String bookTitle = plugin.getConfiguration().getBookTitle();
-		List<String> bookContent = plugin.getConfiguration().getBookContent();
-
 		// Do some magic
 		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
 		BookMeta meta = (BookMeta) book.getItemMeta();
 
 		// If the player hasn't played before, continue.
 		if (!player.hasPlayedBefore() && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.obtain")) {
-			if (bookContent != null && !bookContent.isEmpty()) {
-				meta.setAuthor(bookAuthor);
-				meta.setTitle(bookTitle);
-				meta.setPages(bookContent);
+			if (plugin.getConfiguration().getBookContent() != null && !plugin.getConfiguration().getBookContent().isEmpty()) {
+				meta.setAuthor(plugin.getConfiguration().getBookAuthor());
+				meta.setTitle(plugin.getConfiguration().getBookTitle());
+				meta.setPages(plugin.getConfiguration().getBookContent());
 				book.setItemMeta(meta);
 				player.getInventory().addItem(book);
-				Bukkit.getLogger().log(Level.INFO, player.getName() + " has received a Lore book.");
-				if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.message") && joinMessage != null && !joinMessage.isEmpty()) {
-					player.sendMessage(joinMessage);
+				plugin.getLogger().log(Level.INFO, player.getName() + " has received a Lore book.");
+				if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.message") && plugin.getConfiguration().getJoinMessage() != null && !plugin.getConfiguration().getJoinMessage().isEmpty()) {
+					player.sendMessage(plugin.getConfiguration().getJoinMessage());
 				}
-			} else {
-				Bukkit.getLogger().log(Level.WARNING, "Lore was unable to create a book for " + player.getName() + ".");
 			}
 		}
 	}

@@ -20,6 +20,7 @@
 package com.almuradev.lore;
 
 import java.io.IOException;
+import java.util.logging.Level;
 
 import com.almuradev.lore.command.LoreCommands;
 import com.almuradev.lore.config.LoreConfiguration;
@@ -36,7 +37,9 @@ public class LorePlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		config = new LoreConfiguration(this);
-		config.init();
+		if (!config.init()) {
+			return;
+		}
 
 		// Register commands
 		getCommand("lore").setExecutor(new LoreCommands(this));

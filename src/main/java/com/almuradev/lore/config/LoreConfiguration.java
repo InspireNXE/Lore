@@ -21,9 +21,11 @@ package com.almuradev.lore.config;
 
 import java.io.File;
 import java.util.List;
+import java.util.logging.Level;
 
 import com.almuradev.lore.LorePlugin;
 
+import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
 
 public class LoreConfiguration {
@@ -36,7 +38,7 @@ public class LoreConfiguration {
 		this.plugin = plugin;
 	}
 
-	public void init() {
+	public boolean init() {
 		// Read in default config.yml
 		if (!new File(plugin.getDataFolder(), "config.yml").exists()) {
 			plugin.saveDefaultConfig();
@@ -47,6 +49,12 @@ public class LoreConfiguration {
 		bookTitle = config.getString("title");
 		bookContent = config.getStringList("content");
 		joinMessage = config.getString("join-message");
+
+		if (bookContent == null || bookContent.isEmpty()) {
+			plugin.getLogger().log(Level.SEVERE, "Unable to get content for Lore book. Use the '/lore set' command while holding a book to make that the Lore book!");
+			return false;
+		}
+		return true;
 	}
 
 	public void save() {

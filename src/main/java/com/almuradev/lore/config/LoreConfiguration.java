@@ -38,7 +38,7 @@ public class LoreConfiguration {
 		this.plugin = plugin;
 	}
 
-	public boolean init() {
+	public void init() {
 		// Read in default config.yml
 		if (!new File(plugin.getDataFolder(), "config.yml").exists()) {
 			plugin.saveDefaultConfig();
@@ -52,9 +52,10 @@ public class LoreConfiguration {
 
 		if (bookContent == null || bookContent.isEmpty()) {
 			plugin.getLogger().log(Level.SEVERE, "Unable to get content for Lore book. Use the '/lore set' command while holding a book to make that the Lore book!");
-			return false;
+			bookContent.add("");
+		} else {
+			plugin.getLogger().log(Level.INFO, "Loaded settings from Lore's config.yml successfully.");
 		}
-		return true;
 	}
 
 	public void save() {

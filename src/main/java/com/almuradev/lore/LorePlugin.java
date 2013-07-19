@@ -37,9 +37,9 @@ public class LorePlugin extends JavaPlugin {
 	@Override
 	public void onEnable() {
 		config = new LoreConfiguration(this);
-		if (!config.init()) {
-			return;
-		}
+
+		// Initialize configuration
+		config.init();
 
 		// Register commands
 		getCommand("lore").setExecutor(new LoreCommands(this));

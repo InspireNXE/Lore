@@ -19,8 +19,6 @@
  */
 package com.almuradev.lore.command;
 
-import java.util.logging.Level;
-
 import com.almuradev.lore.LorePlugin;
 import com.almuradev.lore.util.VaultUtil;
 
@@ -33,7 +31,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
-public class LoreCommands implements CommandExecutor{
+public class LoreCommands implements CommandExecutor {
 	private final LorePlugin plugin;
 
 	public LoreCommands(LorePlugin plugin) {
@@ -44,54 +42,90 @@ public class LoreCommands implements CommandExecutor{
 	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
 		if (command.getName().equalsIgnoreCase("lore")) {
 			Player player = null;
+			Boolean isPlayer = false;
+
 			if (sender instanceof Player) {
+				isPlayer = true;
 				player = (Player) sender;
 			}
 
 			if (args.length > 0) {
-				if (args[0].equalsIgnoreCase("set")) {
-					if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.set")) {
-						if (player.getItemInHand().getItemMeta() instanceof BookMeta) {
-							BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
+				if (args[0].equalsIgnoreCase("give")) {
+					if (isPlayer) {
+						if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.give")) {
+							Player target = Bukkit.getPlayerExact(args[1]);
 
-							if (meta.getPages() != null && !meta.getPages().isEmpty()) {
-								plugin.getConfiguration().setBookAuthor(meta.getAuthor());
-								plugin.getConfiguration().setBookTitle(meta.getTitle());
-								plugin.getConfiguration().setBookContent(meta.getPages());
+							if (target != null) {
+								ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+								BookMeta meta = (BookMeta) book.getItemMeta();
 
-								plugin.getConfiguration().save();
-								player.sendMessage("Book saved to config.yml.");
+								// Set the BookMeta's details as the ones from the config.yml that was last loaded.
+								meta.setAuthor(plugin.getConfiguration().getBookAuthor());
+								meta.setTitle(plugin.getConfiguration().getBookTitle());
+								meta.setPages(plugin.getConfiguration().getBookContent());
+
+								// Add the BookMeta to the Book and give it to the player.
+								book.setItemMeta(meta);
+								target.getInventory().addItem(book);
+								sender.sendMessage("A Lore book has been given to " + target.getName());
 							} else {
-								player.sendMessage("Unable to save book to config.yml, null book contents.");
+								sender.sendMessage("Unable to give specified player a Lore book. Is the player online?");
 							}
-						} else {
-							player.sendMessage("Item in hand must be the book you want to set.");
 						}
 					} else {
-						player.sendMessage("Insufficient permissions to use that command.");
+						Player target = Bukkit.getPlayerExact(args[1]);
+
+						if (target != null) {
+							ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+							BookMeta meta = (BookMeta) book.getItemMeta();
+
+							// Set the BookMeta's details as the ones from the config.yml that was last loaded.
+							meta.setAuthor(plugin.getConfiguration().getBookAuthor());
+							meta.setTitle(plugin.getConfiguration().getBookTitle());
+							meta.setPages(plugin.getConfiguration().getBookContent());
+
+							// Add the BookMeta to the Book and give it to the player.
+							book.setItemMeta(meta);
+							target.getInventory().addItem(book);
+							sender.sendMessage("A Lore book has been given to " + target.getName());
+						} else {
+							sender.sendMessage("Unable to give specified player a Lore book. Is the player online?");
+						}
 					}
-				} else if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.give") && args[0].equalsIgnoreCase("give")) {
-					Player target = Bukkit.getPlayerExact(args[1]);
-
-					if (target != null) {
-						// Do some magic
-						ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
-						BookMeta meta = (BookMeta) book.getItemMeta();
-
-						meta.setAuthor(plugin.getConfiguration().getBookAuthor());
-						meta.setTitle(plugin.getConfiguration().getBookTitle());
-						meta.setPages(plugin.getConfiguration().getBookContent());
-						book.setItemMeta(meta);
-
-						target.getInventory().addItem(book);
+				} else if (args[0].equalsIgnoreCase("reload")) {
+					if (isPlayer) {
+						if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.reload")) {
+							plugin.getConfiguration().init();
+						}
 					} else {
-						sender.sendMessage("That player is not online.");
+						plugin.getConfiguration().init();
+					}
+				} else if (args[0].equalsIgnoreCase("set")) {
+					if (isPlayer) {
+						if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.set")) {
+							if (player.getItemInHand().getItemMeta() instanceof BookMeta) {
+								BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
+
+								// Make sure the page content isn't null
+								if (meta.getPages() != null && !meta.getPages().isEmpty()) {
+									// Set the configuration values as the in-hand book's details.
+									plugin.getConfiguration().setBookAuthor(meta.getAuthor());
+									plugin.getConfiguration().setBookTitle(meta.getTitle());
+									plugin.getConfiguration().setBookContent(meta.getPages());
+
+									// Save save the meta to the config.yml
+									plugin.getConfiguration().save();
+									player.sendMessage("Book saved to config.yml.");
+								} else {
+									player.sendMessage("Unable to save book to config.yml, page content is null!");
+								}
+							}
+						}
+					} else {
+						sender.sendMessage("A player must perform this command!");
 					}
 				}
 				return true;
-			} else if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.relead") && args[0].equalsIgnoreCase("reload")) {
-				plugin.getConfiguration().init();
-				plugin.getLogger().log(Level.INFO, "Reloaded settings from config.yml.");
 			}
 		}
 		return false;

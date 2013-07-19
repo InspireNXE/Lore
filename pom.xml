@@ -7,7 +7,7 @@
 	<!-- Project information -->
 	<groupId>com.almuradev</groupId>
 	<artifactId>lore</artifactId>
-	<version>1.0.2-SNAPSHOT</version>
+	<version>1.0.3-SNAPSHOT</version>
 	<name>Lore</name>
 	<url>http://www.almuradev.com</url>
 	<description>Lore is an administrator friendly plugin to setup and give a predefined book at login.</description>
@@ -81,6 +81,7 @@
 	<!-- Build configuration -->
 	<build>
 		<defaultGoal>clean package</defaultGoal>
+		<finalName>Lore</finalName>
 
 		<!-- Resources -->
 		<resources>

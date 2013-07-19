@@ -9,26 +9,49 @@ depend: [Vault]
 load: POSTWORLD
 
 commands:
-   lore:
-      usage: /<command> [arguments]
+  lore:
+    description: Commands to manage Lore.
+    usage: |
+      /lore give - Gives the current Lore book to the specified player.
+      /lore reload - Reloads the book information from the config.yml.
+      /lore set - Sets the in-hand book (if holding one) as the default Lore book.
+  lore give:
+    description: Gives the current Lore book to the specified player.
+    usage: /<command> [player]
+    permission: lore.command.give
+    permission-message: You do not have permission to use this command.
+  lore reload:
+    description: Reloads the book information from the config.yml.
+    usage: /<command>
+    permission: lore.command.reload
+    permission-message: You do not have permission to use this command.
+  lore set:
+    description: Sets the in-hand book (if holding one) as the default Lore book.
+    usage: /<command>
+    permission: lore.command.set
+    permission-message: You do not have permission to use this command.
 
 permissions:
   lore.*:
     description: Combines all permissions under one wildcard
     children:
-      lore.give: true
+      lore.command.give: true
+      lore.command.reload: true
+      lore.command.set: true
       lore.message: true
-      lore.set: true
       lore.obtain: true
-  lore.give:
+  lore.command.give:
     description: Any player with this node enabled will be able to give a specified player the lore book.
+    default: false
+  lore.command.reload:
+    description:
+    default: false
+  lore.command.set:
+    description: Any player with this node enabled will be able to do /lore set with a book in hand and set the current lore book details as the book in hand.
     default: false
   lore.obtain:
     description: Any player with this node enabled will receive a book upon first joining the server.
     default: false
   lore.message:
     description: Any player with this node enabled will be sent the message set in the config.yml (if message is empty, nothing will be sent)
-    default: false
-  lore.set:
-    description: Any player with this node enabled will be able to do /lore set with a book in hand and set the current lore book details as the book in hand.
     default: false

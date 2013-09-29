@@ -19,19 +19,14 @@
  */
 package com.almuradev.lore.listener;
 
-import java.util.logging.Level;
-
 import com.almuradev.lore.LorePlugin;
 import com.almuradev.lore.util.VaultUtil;
-
-import org.bukkit.Material;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
-import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.BookMeta;
+import org.bukkit.event.player.PlayerRespawnEvent;
 
 public class LoreListener implements Listener {
 	private final LorePlugin plugin;
@@ -40,26 +35,26 @@ public class LoreListener implements Listener {
 		this.plugin = plugin;
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler (priority = EventPriority.HIGHEST)
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 
-		// Do some magic
-		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
-		BookMeta meta = (BookMeta) book.getItemMeta();
+		if (!player.hasPlayedBefore() && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.join.obtain")) {
+			player.getInventory().addItem(plugin.getConfiguration().getBook());
+			if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.join.message") && plugin.getConfiguration().getJoinMessage() != null && !plugin.getConfiguration().getJoinMessage().isEmpty()) {
+				player.sendMessage(plugin.getConfiguration().getJoinMessage());
+			}
+		}
+	}
 
-		// If the player hasn't played before, continue.
-		if (!player.hasPlayedBefore() && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.obtain")) {
-			if (plugin.getConfiguration().getBookContent() != null && !plugin.getConfiguration().getBookContent().isEmpty()) {
-				meta.setAuthor(plugin.getConfiguration().getBookAuthor());
-				meta.setTitle(plugin.getConfiguration().getBookTitle());
-				meta.setPages(plugin.getConfiguration().getBookContent());
-				book.setItemMeta(meta);
-				player.getInventory().addItem(book);
-				plugin.getLogger().log(Level.INFO, player.getName() + " has received a Lore book.");
-				if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.message") && plugin.getConfiguration().getJoinMessage() != null && !plugin.getConfiguration().getJoinMessage().isEmpty()) {
-					player.sendMessage(plugin.getConfiguration().getJoinMessage());
-				}
+	@EventHandler (priority = EventPriority.HIGHEST)
+	public void onPlayerRespawn(PlayerRespawnEvent event) {
+		Player player = event.getPlayer();
+
+		if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.respawn.obtain")) {
+			player.getInventory().addItem(plugin.getConfiguration().getBook());
+			if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.respawn.message") && plugin.getConfiguration().getJoinMessage() != null && !plugin.getConfiguration().getJoinMessage().isEmpty()) {
+				player.sendMessage(plugin.getConfiguration().getRespawnMessage());
 			}
 		}
 	}

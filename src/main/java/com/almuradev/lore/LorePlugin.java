@@ -19,14 +19,9 @@
  */
 package com.almuradev.lore;
 
-import java.io.IOException;
-import java.util.logging.Level;
-
 import com.almuradev.lore.command.LoreCommands;
 import com.almuradev.lore.config.LoreConfiguration;
 import com.almuradev.lore.listener.LoreListener;
-
-import org.mcstats.MetricsLite;
 
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -46,13 +41,6 @@ public class LorePlugin extends JavaPlugin {
 
 		// Register events
 		Bukkit.getServer().getPluginManager().registerEvents(new LoreListener(this), this);
-
-		// Start metrics
-		try {
-			MetricsLite metrics = new MetricsLite(this);
-			metrics.start();
-		} catch (IOException e) {
-		}
 	}
 
 	public LoreConfiguration getConfiguration() {

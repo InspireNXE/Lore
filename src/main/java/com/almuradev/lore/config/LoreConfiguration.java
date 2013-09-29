@@ -24,13 +24,14 @@ import java.util.List;
 import java.util.logging.Level;
 
 import com.almuradev.lore.LorePlugin;
-
-import org.bukkit.Bukkit;
+import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreConfiguration {
 	private final LorePlugin plugin;
-	private String bookAuthor, bookTitle, joinMessage;
+	private String bookAuthor, bookTitle, joinMessage, respawnMessage;
 	private List<String> bookContent;
 	private FileConfiguration config;
 
@@ -49,6 +50,7 @@ public class LoreConfiguration {
 		bookTitle = config.getString("title");
 		bookContent = config.getStringList("content");
 		joinMessage = config.getString("join-message");
+		respawnMessage = config.getString("respawn-message");
 
 		if (bookContent == null || bookContent.isEmpty()) {
 			plugin.getLogger().log(Level.SEVERE, "Unable to get content for Lore book. Use the '/lore set' command while holding a book to make that the Lore book!");
@@ -67,6 +69,10 @@ public class LoreConfiguration {
 
 	public String getJoinMessage() {
 		return joinMessage;
+	}
+
+	public String getRespawnMessage() {
+		return respawnMessage;
 	}
 
 	public String getBookAuthor() {
@@ -91,5 +97,19 @@ public class LoreConfiguration {
 
 	public void setBookContent(List<String> bookContent) {
 		this.bookContent = bookContent;
+	}
+
+	public ItemStack getBook() {
+		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
+		BookMeta meta = (BookMeta) book.getItemMeta();
+
+		if (plugin.getConfiguration().getBookContent() != null && !plugin.getConfiguration().getBookContent().isEmpty()) {
+			meta.setAuthor(plugin.getConfiguration().getBookAuthor());
+			meta.setTitle(plugin.getConfiguration().getBookTitle());
+			meta.setPages(plugin.getConfiguration().getBookContent());
+			book.setItemMeta(meta);
+		}
+
+		return book;
 	}
 }

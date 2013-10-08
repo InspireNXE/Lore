@@ -7,10 +7,10 @@
 	<!-- Project information -->
 	<groupId>com.almuradev</groupId>
 	<artifactId>lore</artifactId>
-	<version>1.0.4-SNAPSHOT</version>
+	<version>1.1-SNAPSHOT</version>
 	<name>Lore</name>
 	<url>http://www.almuradev.com</url>
-	<description>Lore is an administrator friendly plugin to setup and give a predefined book at login.</description>
+	<description>Lore is an ideal plugin for RPG servers as it allows the administrator to easily set and provide books upon first join and respawns.</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

@@ -1,5 +1,7 @@
-join-message:
-respawn-message:
-author:
-title:
-content:
+join:
+  message: You've just received book(s) of lore.
+  books: []
+respawn:
+  message: You've just received book(s) of lore.
+  books: []
+debug: false

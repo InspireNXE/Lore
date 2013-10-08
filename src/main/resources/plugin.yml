@@ -12,66 +12,100 @@ commands:
   lore:
     description: Commands to manage Lore.
     usage: |
-      /lore give - Gives the current Lore book to the specified player.
-      /lore reload - Reloads the book information from the config.yml.
-      /lore set - Sets the in-hand book (if holding one) as the default Lore book.
+      /lore give [player] [book] - Gives the specified player a copy of the specified book from Lore's book library.
+      /lore create [book] - Adds the held book to Lore's book library with the specified name.
+      /lore remove [book] - Removes the specified book from Lore's book library.
+      /lore join add [book] - Adds the specified book to the join list in the config.yml.
+      /lore join remove [book] - Removes the specified book from the join list in the config.yml.
+      /lore respawn add [book] - Adds the specified book to the respawn list in the config.yml.
+      /lore respawn remove [book] - Removes the specified book from the respawn list in the config.yml.
   lore give:
-    description: Gives the current Lore book to the specified player.
-    usage: /<command> [player]
+    description: Gives the specified player a copy of the specified book from Lore's book library.
+    usage: /<command> [player] [book]
     permission: lore.command.give
     permission-message: You do not have permission to use this command.
-  lore reload:
-    description: Reloads the book information from the config.yml.
-    usage: /<command>
-    permission: lore.command.reload
+  lore create:
+    description: Adds the held book to Lore's book library with the specified name.
+    usage: /<command> [book]
+    permission: lore.command.create
     permission-message: You do not have permission to use this command.
-  lore set:
-    description: Sets the in-hand book (if holding one) as the default Lore book.
-    usage: /<command>
-    permission: lore.command.set
+  lore remove:
+    description: Removes the specified book from Lore's book library.
+    usage: /<command> [book]
+    permission: lore.command.remove
+    permission-message: You do not have permission to use this command.
+  lore join add:
+    description: Adds the specified book to the join list in the config.yml.
+    usage: /<command> [book]
+    permission: lore.command.join.add
+    permission-message: You do not have permission to use this command.
+  lore join remove:
+    description: Removes the specified book from the join list in the config.yml.
+    usage: /<command> [book>
+    permission: lore.command.join.remove
+    permission-message: You do not have permission to use this command.
+  lore respawn add:
+    description: Adds the specified book to the respawn list in the config.yml.
+    usage: /<command> [book>
+    permission: lore.command.respawn.add
+    permission-message: You do not have permission to use this command.
+  lore respawn remove:
+    description: Removes the specified book from the respawn list in the config.yml.
+    usage: /<command> [book>
+    permission: lore.command.respawn.remove
     permission-message: You do not have permission to use this command.
 
 permissions:
-  lore.*:
-    description: Combines all permissions under one wildcard
-    children:
-      lore.command.*: true
-      lore.join.*: true
-      lore.respawn.*: true
   lore.command.*:
     description: Combines all 'command' permissions under one wildcard.
     children:
       lore.command.give: true
-      lore.command.reload: true
-      lore.command.set: true
+      lore.command.create: true
+      lore.command.remove: true
+      lore.command.join.add: true
+      lore.command.join.remove: true
+      lore.command.respawn.add: true
+      lore.command.respawn.remove: true
   lore.join.*:
-    description: Combines all 'join' permissions under one wildcard.
+    description: Combines all the 'join' permissions under one wildcard.
     children:
       lore.join.obtain: true
       lore.join.message: true
   lore.respawn.*:
-    description: Combines all 'respawn' permissions under one wildcard.
+    description: Combines all the 'respawn' permissions under one wildcard.
     children:
       lore.respawn.obtain: true
       lore.respawn.message: true
   lore.command.give:
-    description: Any player with this node enabled will be able to give a specified player the lore book.
+    description: Allows the player to give any book to another player.
     default: false
-  lore.command.reload:
-    description:
+  lore.command.create:
+    description: Allows the player to add a new book to Lore's book library.
     default: false
-  lore.command.set:
-    description: Any player with this node enabled will be able to do /lore set with a book in hand and set the current lore book details as the book in hand.
+  lore.command.remove:
+    description: Allows the player to remove a book from Lore's book library.
+    default: false
+  lore.command.join.add:
+    description: Allows the player to add a book to the join book list.
+    default: false
+  lore.command.join.remove:
+    description: Allows the player to remove a book from the join book list.
+    default: false
+  lore.command.respawn.add:
+    description: Allows the player to add a book to the respawn book list.
+    default: false
+  lore.command.respawn.remove:
+    description: Allows the player to remove a book from the respawm book list.
     default: false
   lore.join.obtain:
-    description: Any player with this node enabled will receive a book upon first joining the server.
+    description: Allows the player to obtain all books in the join list upon first login.
     default: false
   lore.join.message:
-    description: Any player with this node enabled will be sent the message set in the config.yml (if message is empty, nothing will be sent) upon first joining the server.
+    description: Allows the player to receive the join message when receiving join books.
     default: false
   lore.respawn.obtain:
-    description: Any player with this node enabled will receive a book upon respawn.
+    description: Allows the player to obtain all books in the respawn list upon respawning.
     default: false
   lore.respawn.message:
-    description: Any player with this node enabled will be sent the message set in the config.yml (if message is empty, nothing will be sent) upon respawn.
+    description: Allows the player to receive the respawn message when receiving respawn books.
     default: false

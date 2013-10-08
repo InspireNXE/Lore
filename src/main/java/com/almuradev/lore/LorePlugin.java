@@ -19,10 +19,6 @@
  */
 package com.almuradev.lore;
 
-import com.almuradev.lore.command.LoreCommands;
-import com.almuradev.lore.config.LoreConfiguration;
-import com.almuradev.lore.listener.LoreListener;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -36,11 +32,11 @@ public class LorePlugin extends JavaPlugin {
 		// Initialize configuration
 		config.init();
 
+		// Register listeners
+		Bukkit.getServer().getPluginManager().registerEvents(new LoreListener(this), this);
+
 		// Register commands
 		getCommand("lore").setExecutor(new LoreCommands(this));
-
-		// Register events
-		Bukkit.getServer().getPluginManager().registerEvents(new LoreListener(this), this);
 	}
 
 	public LoreConfiguration getConfiguration() {

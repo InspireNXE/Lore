@@ -46,6 +46,9 @@ public class LoreCommands implements CommandExecutor {
 
 			if (args.length >= 0) {
 
+				/**
+				 * Command: /lore give
+				 */
 				if (args[0].equalsIgnoreCase("give")) {
 					if (args.length >= 2) {
 						if ((isPlayer && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.give")) || !isPlayer) {
@@ -71,6 +74,9 @@ public class LoreCommands implements CommandExecutor {
 					return false;
 				}
 
+				/**
+				 * Command: /lore create
+				 */
 				if (args[0].equalsIgnoreCase("create")) {
 					if (args.length >= 2) {
 						if (isPlayer && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.create")) {
@@ -95,6 +101,9 @@ public class LoreCommands implements CommandExecutor {
 					return false;
 				}
 
+				/**
+				 * Command: /lore remove
+				 */
 				if (args[0].equalsIgnoreCase("remove")) {
 					if (args.length >= 2) {
 						if (isPlayer && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.remove")) {
@@ -112,6 +121,9 @@ public class LoreCommands implements CommandExecutor {
 					return false;
 				}
 
+				/**
+				 * Command: /lore join
+				 */
 				if (args[0].equalsIgnoreCase("join")) {
 					if (args.length == 3) {
 						if (args[1].equalsIgnoreCase("add") && isPlayer && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.join.add")) {
@@ -134,6 +146,9 @@ public class LoreCommands implements CommandExecutor {
 					return false;
 				}
 
+				/**
+				 * Command: /lore respawn
+				 */
 				if (args[0].equalsIgnoreCase("respawn")) {
 					if (args.length == 3) {
 						if (args[1].equalsIgnoreCase("add") && isPlayer && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.command.respawn.add")) {

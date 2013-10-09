@@ -10,7 +10,7 @@
 	<version>1.1-SNAPSHOT</version>
 	<name>Lore</name>
 	<url>http://www.almuradev.com</url>
-	<description>Lore is an ideal plugin for RPG servers as it allows the administrator to easily set and provide books upon first join and respawns.</description>
+	<description>Lore is a simple and lightweight plugin that is aimed to give your server a more diverse and informative experience by allowing administrators to easily create, manage and hand-out books to players either on their first login or upon respawning. This is a must have plugin for any RPG server out there!</description>
 
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

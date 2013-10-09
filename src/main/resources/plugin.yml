@@ -12,13 +12,13 @@ commands:
   lore:
     description: Commands to manage Lore.
     usage: |
-      /lore give [player] [book] - Gives the specified player a copy of the specified book from Lore's book library.
-      /lore create [book] - Adds the held book to Lore's book library with the specified name.
-      /lore remove [book] - Removes the specified book from Lore's book library.
-      /lore join add [book] - Adds the specified book to the join list in the config.yml.
-      /lore join remove [book] - Removes the specified book from the join list in the config.yml.
-      /lore respawn add [book] - Adds the specified book to the respawn list in the config.yml.
-      /lore respawn remove [book] - Removes the specified book from the respawn list in the config.yml.
+      /lore give [player] [book]
+      /lore create [book]
+      /lore remove [book]
+      /lore join add [book]
+      /lore join remove [book]
+      /lore respawn add [book]
+      /lore respawn remove [book]
   lore give:
     description: Gives the specified player a copy of the specified book from Lore's book library.
     usage: /<command> [player] [book]
@@ -41,17 +41,17 @@ commands:
     permission-message: You do not have permission to use this command.
   lore join remove:
     description: Removes the specified book from the join list in the config.yml.
-    usage: /<command> [book>
+    usage: /<command> [book]
     permission: lore.command.join.remove
     permission-message: You do not have permission to use this command.
   lore respawn add:
     description: Adds the specified book to the respawn list in the config.yml.
-    usage: /<command> [book>
+    usage: /<command> [book]
     permission: lore.command.respawn.add
     permission-message: You do not have permission to use this command.
   lore respawn remove:
     description: Removes the specified book from the respawn list in the config.yml.
-    usage: /<command> [book>
+    usage: /<command> [book]
     permission: lore.command.respawn.remove
     permission-message: You do not have permission to use this command.
 

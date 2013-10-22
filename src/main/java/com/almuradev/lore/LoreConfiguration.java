@@ -22,7 +22,6 @@ package com.almuradev.lore;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
-import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -47,7 +46,7 @@ public class LoreConfiguration {
 			try {
 				new File(plugin.getDataFolder() + "/books/").mkdir();
 			} catch (Exception e) {
-				plugin.getLogger().log(Level.SEVERE, "Unable to create 'books' folder in basedir/plugins/Lore");
+				plugin.getLogger().severe("Unable to create 'books' folder in basedir/plugins/Lore");
 				if (debugMode()) {
 					e.printStackTrace();
 				}
@@ -98,7 +97,7 @@ public class LoreConfiguration {
 				meta.setPages(bookConfig.getStringList("pages"));
 				book.setItemMeta(meta);
 			} else {
-				plugin.getLogger().log(Level.SEVERE, "Unable to obtain " + name + "\'s pages.");
+				plugin.getLogger().severe("Unable to obtain " + name + "\'s pages.");
 			}
 		}
 		return book;
@@ -111,7 +110,7 @@ public class LoreConfiguration {
 			try {
 				bookFile.createNewFile();
 			} catch (IOException e) {
-				plugin.getLogger().log(Level.SEVERE, "Unable to create " + name + ".yml!");
+				plugin.getLogger().severe("Unable to create " + name + ".yml!");
 				if (debugMode()) {
 					e.printStackTrace();
 				}
@@ -126,7 +125,7 @@ public class LoreConfiguration {
 		try {
 			bookConfig.save(bookFile);
 		} catch (IOException e) {
-			plugin.getLogger().log(Level.WARNING, "Unable to save file for " + name + ".");
+			plugin.getLogger().severe("Unable to save file for " + name + ".");
 			if (debugMode()) {
 				e.printStackTrace();
 			}
@@ -138,7 +137,7 @@ public class LoreConfiguration {
 			try {
 				new File(plugin.getDataFolder() + "/books/" + name + ".yml").delete();
 			} catch (Exception e) {
-				plugin.getLogger().log(Level.SEVERE, "Unable to delete " + name + ".yml!");
+				plugin.getLogger().severe("Unable to delete " + name + ".yml!");
 				if (debugMode()) {
 					e.printStackTrace();
 				}
@@ -151,7 +150,7 @@ public class LoreConfiguration {
 		if (!joinBookList.contains(name)) {
 			joinBookList.add(name);
 			plugin.getConfig().set("join.books", joinBookList);
-			plugin.getLogger().log(Level.INFO, name + " has been added to the list of join books.");
+			plugin.getLogger().info(name + " has been added to the list of join books.");
 			plugin.saveConfig();
 			return true;
 		}
@@ -164,7 +163,7 @@ public class LoreConfiguration {
 			respawnBookList.add(name);
 			plugin.getConfig().set("respawn.books", respawnBookList);
 			plugin.getConfig().getConfigurationSection("respawn").getStringList("books").add(name);
-			plugin.getLogger().log(Level.INFO, name + " has been added to the list of respawn books.");
+			plugin.getLogger().info(name + " has been added to the list of respawn books.");
 			plugin.saveConfig();
 			return true;
 		}
@@ -176,7 +175,7 @@ public class LoreConfiguration {
 		if (joinBookList.contains(name)) {
 			joinBookList.remove(name);
 			plugin.getConfig().set("join.books", joinBookList);
-			plugin.getLogger().log(Level.INFO, name + " has been removed from the list of join books.");
+			plugin.getLogger().info(name + " has been removed from the list of join books.");
 			plugin.saveConfig();
 			return true;
 		}
@@ -188,7 +187,7 @@ public class LoreConfiguration {
 		if (respawnBookList.contains(name)) {
 			respawnBookList.remove(name);
 			plugin.getConfig().set("respawn.books", respawnBookList);
-			plugin.getLogger().log(Level.INFO, name + " has been removed from the list of respawn books.");
+			plugin.getLogger().info(name + " has been removed from the list of respawn books.");
 			plugin.saveConfig();
 			return true;
 		}
@@ -197,7 +196,7 @@ public class LoreConfiguration {
 
 	public boolean verifyBook(String name) {
 		if (new File(plugin.getDataFolder() + "/books/" + name + ".yml").exists()) {
-			plugin.getLogger().log(Level.INFO, plugin.getDataFolder() + "/books/" + name + ".yml");
+			plugin.getLogger().info(plugin.getDataFolder() + "/books/" + name + ".yml");
 			return true;
 		}
 		return false;

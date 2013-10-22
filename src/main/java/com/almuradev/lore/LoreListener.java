@@ -37,7 +37,7 @@ public class LoreListener implements Listener {
 	public void onPlayerJoin(PlayerJoinEvent event) {
 		Player player = event.getPlayer();
 
-		if (!player.hasPlayedBefore() && VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.join.obtain")) {
+		if (!player.hasPlayedBefore() && player.hasPermission("lore.join.obtain")) {
 			boolean receivedBook = false;
 			for (String book : plugin.getConfiguration().getJoinBooks()) {
 				if (plugin.getConfiguration().verifyBook(book)) {
@@ -45,7 +45,7 @@ public class LoreListener implements Listener {
 					receivedBook = true;
 				}
 			}
-			if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.join.message") && receivedBook) {
+			if (player.hasPermission("lore.join.message") && receivedBook) {
 				player.sendMessage(plugin.getConfiguration().getJoinMessage());
 			}
 		}
@@ -55,7 +55,7 @@ public class LoreListener implements Listener {
 	public void onPlayerRespawn(PlayerRespawnEvent event) {
 		Player player = event.getPlayer();
 
-		if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.respawn.obtain")) {
+		if (player.hasPermission("lore.respawn.obtain")) {
 			boolean receivedBook = false;
 			for (String book : plugin.getConfiguration().getRespawnBooks()) {
 				if (plugin.getConfiguration().verifyBook(book)) {
@@ -63,7 +63,7 @@ public class LoreListener implements Listener {
 					receivedBook = true;
 				}
 			}
-			if (VaultUtil.hasPermission(player.getName(), player.getWorld().getName(), "lore.respawn.message") && receivedBook) {
+			if (player.hasPermission("lore.respawn.message") && receivedBook) {
 				player.sendMessage(plugin.getConfiguration().getRespawnMessage());
 			}
 		}

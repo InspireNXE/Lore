@@ -37,6 +37,11 @@ public class LorePlugin extends JavaPlugin {
 
 		// Register commands
 		getCommand("lore").setExecutor(new LoreCommands(this));
+
+		// Are we in debug mode?
+		if (config.debugMode()) {
+			getLogger().info("Debug mode is enabled.");
+		}
 	}
 
 	public LoreConfiguration getConfiguration() {

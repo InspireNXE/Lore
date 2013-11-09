@@ -47,7 +47,7 @@ public class LoreCommands implements CommandExecutor {
 			if (args.length > 0) {
 				switch (args[0].toLowerCase()) {
 					case "give":
-						if (args.length > 2) {
+						if (args.length >= 2) {
 							if ((isPlayer && player.hasPermission("lore.command.give")) || !isPlayer) {
 								Player target = Bukkit.getPlayerExact(args[1]);
 								if (target != null) {
@@ -71,7 +71,7 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "create":
-						if (args.length > 2) {
+						if (args.length >= 2) {
 							if (isPlayer && player.hasPermission("lore.command.create")) {
 								if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
 									sender.sendMessage("Held item must be a signed book.");
@@ -94,7 +94,7 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "remove":
-						if (args.length > 1) {
+						if (args.length >= 1) {
 							if (isPlayer && player.hasPermission("lore.command.remove")) {
 								if (plugin.getConfiguration().verifyBook(args[1])) {
 									plugin.getConfiguration().removeBook(args[1]);
@@ -110,7 +110,7 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "join":
-						if (args.length > 2) {
+						if (args.length >= 2) {
 							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.join.add")) {
 								if (plugin.getConfiguration().addJoinBook(args[2])) {
 									sender.sendMessage(args[2] + " was added to join list.");
@@ -131,7 +131,7 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "respawn":
-						if (args.length > 2) {
+						if (args.length >= 2) {
 							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.respawn.add")) {
 								if (plugin.getConfiguration().addRespawnBook(args[2])) {
 									sender.sendMessage(args[2] + " was added to respawn list.");

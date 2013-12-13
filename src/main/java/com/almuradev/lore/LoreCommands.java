@@ -1,8 +1,8 @@
-/*
+/**
  * This file is part of Lore.
  *
- * Copyright (c) 2013, AlmuraDev <http://www.almuradev.com/>
- * Lore is licensed under the Almura Development License.
+ * Copyright (c) 2013 AlmuraDev <http://almuradev.com/>
+ * Lore is licensed under the GNU General Public License Version 3.
  *
  * Lore is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by

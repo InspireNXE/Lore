@@ -1,0 +1,78 @@
+// Default tasks
+defaultTasks 'clean', 'build', 'licenseFormatMain'
+
+// Apply plugins
+apply plugin: 'java'
+apply plugin: 'license'
+
+// Basic project information
+group = 'com.almuradev'
+archivesBaseName = 'lore'
+version = '1.2.1-SNAPSHOT'
+
+// Extended project information
+ext.mainClass = 'com.almuradev.lore.LorePlugin'
+ext.inceptionYear = '2013'
+ext.packaging = 'jar'
+ext.url = 'http://almuradev.com'
+ext.description = 'Lore is a simple and lightweight plugin that is aimed to give your server a more diverse and informative experience by allowing administrators to easily create, manage and hand-out books to players either on their first login or upon respawning. This is a must have plugin for any RPG server out there!'
+ext.organization = 'AlmuraDev'
+ext.license = 'GNU General Public License Version 3'
+
+// Minimum version of Java required
+sourceCompatibility = '1.7'
+targetCompatibility = '1.7'
+
+buildscript {
+    // Repositories and plugin dependencies
+    repositories {
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
+    }
+}
+
+repositories {
+    mavenCentral()
+    maven {
+        name = 'bukkit-repo'
+        url = 'http://repo.bukkit.org/content/groups/public'
+    }
+}
+
+// Dependencies for compilation and testing
+dependencies {
+    compile 'org.bukkit:bukkit:1.7.2-R0.1-SNAPSHOT'
+}
+
+// Include resources in final JAR
+import org.apache.tools.ant.filters.*
+processResources {
+    from(rootProject.rootDir) {
+        include 'LICENSE.txt'
+    }
+    filter ReplaceTokens, tokens: [
+        "name": project.name,
+        "version": version,
+        "description": project.ext.description,
+        "authors": organization,
+        "url": url,
+        "mainClass": mainClass
+    ]
+}
+
+// License header formatting
+import nl.javadude.gradle.plugins.license.License
+tasks.withType(License).each { licenseTask ->
+    licenseTask.exclude '**/*.yml'
+}
+license {
+    ext.name = project.name
+    ext.organization = organization
+    ext.url = url
+    ext.license = license
+    ext.inceptionYear = inceptionYear
+    header rootProject.file('HEADER.txt')
+    strictCheck true
+}

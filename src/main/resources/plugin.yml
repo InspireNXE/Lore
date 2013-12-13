@@ -1,10 +1,10 @@
-name: ${project.name}
-version: ${project.version}
-description: ${project.description}
-author: ${project.organization.name}
-website: ${project.organization.url}
+name: @name@
+version: @version@
+description: @description@
+author: @authors@
+website: @url@
 
-main: ${mainClass}
+main: @mainClass@
 depend: [Vault]
 load: POSTWORLD
 

@@ -24,7 +24,6 @@ import java.io.IOException;
 import java.util.List;
 
 import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
@@ -52,15 +51,10 @@ public class LoreConfiguration {
 				}
 			}
 		}
-
-		final FileConfiguration config = plugin.getConfig();
 	}
 
 	public boolean debugMode() {
-		if (plugin.getConfig().getBoolean("debug")) {
-			return true;
-		}
-		return false;
+		return plugin.getConfig().getBoolean("debug");
 	}
 
 	public String getJoinMessage() {
@@ -103,14 +97,14 @@ public class LoreConfiguration {
 		return book;
 	}
 
-	public void createBook(String name, BookMeta meta) {
+	public void createBook(BookMeta meta) {
 		// Make sure the book file exists
-		File bookFile = new File(plugin.getDataFolder() + "/books/" + name + ".yml");
-		if (!verifyBook(name)) {
+		File bookFile = new File(plugin.getDataFolder() + "/books/" + meta.getTitle() + ".yml");
+		if (!verifyBook(meta.getTitle())) {
 			try {
 				bookFile.createNewFile();
 			} catch (IOException e) {
-				plugin.getLogger().severe("Unable to create " + name + ".yml!");
+				plugin.getLogger().severe("Unable to create " + meta.getTitle() + ".yml!");
 				if (debugMode()) {
 					e.printStackTrace();
 				}
@@ -125,7 +119,7 @@ public class LoreConfiguration {
 		try {
 			bookConfig.save(bookFile);
 		} catch (IOException e) {
-			plugin.getLogger().severe("Unable to save file for " + name + ".");
+			plugin.getLogger().severe("Unable to save file for " + meta.getTitle() + ".");
 			if (debugMode()) {
 				e.printStackTrace();
 			}
@@ -196,7 +190,9 @@ public class LoreConfiguration {
 
 	public boolean verifyBook(String name) {
 		if (new File(plugin.getDataFolder() + "/books/" + name + ".yml").exists()) {
-			plugin.getLogger().info(plugin.getDataFolder() + "/books/" + name + ".yml");
+			if (debugMode()) {
+				plugin.getLogger().info(plugin.getDataFolder() + "/books/" + name + ".yml");
+			}
 			return true;
 		}
 		return false;

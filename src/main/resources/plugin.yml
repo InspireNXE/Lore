@@ -5,7 +5,6 @@ author: @authors@
 website: @url@
 
 main: @mainClass@
-depend: [Vault]
 load: POSTWORLD
 
 commands:
@@ -13,7 +12,7 @@ commands:
     description: Commands to manage Lore.
     usage: |
       /lore give [player] [book]
-      /lore create [book]
+      /lore create
       /lore remove [book]
       /lore join add [book]
       /lore join remove [book]
@@ -25,8 +24,8 @@ commands:
     permission: lore.command.give
     permission-message: You do not have permission to use this command.
   lore create:
-    description: Adds the held book to Lore's book library with the specified name.
-    usage: /<command> [book]
+    description: Adds the held book to Lore's book library with the book's title as the name.
+    usage: /<command>
     permission: lore.command.create
     permission-message: You do not have permission to use this command.
   lore remove:

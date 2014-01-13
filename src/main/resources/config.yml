@@ -4,4 +4,11 @@ join:
 respawn:
   message: You've just received book(s) of lore.
   books: []
+
+# When enabled this will allow players to trade books in Lore's library to villagers.
+# Default: false
+allow-villager-trades: false
+
+# When enabled this will print additional information to the console that could be useful for debugging purposes.
+# Default: false
 debug: false

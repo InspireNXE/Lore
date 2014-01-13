@@ -47,7 +47,7 @@ public class LoreCommands implements CommandExecutor {
 			if (args.length > 0) {
 				switch (args[0].toLowerCase()) {
 					case "give":
-						if (args.length >= 2) {
+						if (args.length > 2) {
 							if ((isPlayer && player.hasPermission("lore.command.give")) || !isPlayer) {
 								Player target = Bukkit.getPlayerExact(args[1]);
 								if (target != null) {
@@ -57,7 +57,7 @@ public class LoreCommands implements CommandExecutor {
 										sender.sendMessage("Sorry, " + args[2] + " does not exist within Lore's book library.");
 										return true;
 									}
-									if (target.getName() != sender.getName()) {
+									if (!target.getName().equals(sender.getName())) {
 										sender.sendMessage("You've given " + args[1] + " a copy of " + args[2] + ".");
 									} else {
 										sender.sendMessage("You've given yourself a copy of " + args[2] + ".");
@@ -71,30 +71,29 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "create":
-						if (args.length >= 2) {
-							if (isPlayer && player.hasPermission("lore.command.create")) {
-								if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
-									sender.sendMessage("Held item must be a signed book.");
-								} else if (plugin.getConfiguration().verifyBook(args[1])) {
-									sender.sendMessage(args[1] + " already exists in Lore's book library.");
-								} else {
-									BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
-									if (meta.hasTitle() == false) {
-										sender.sendMessage("You must sign this book first before adding it to Lore's book library.");
-										return true;
-									}
-									plugin.getConfiguration().createBook(args[1], meta);
-									sender.sendMessage(args[1] + " has been added to Lore's book library.");
+						if (isPlayer && player.hasPermission("lore.command.create")) {
+							if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
+								sender.sendMessage("Held item must be a signed book.");
+							} else {
+								BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
+								if (plugin.getConfiguration().verifyBook(meta.getTitle())) {
+									sender.sendMessage(meta.getTitle() + " already exists in Lore's book library.");
+									return true;
 								}
-							} else if (!isPlayer) {
-								sender.sendMessage("You must be logged in to perform that command!");
+								if (!meta.hasTitle()) {
+									sender.sendMessage("You must sign this book first before adding it to Lore's book library.");
+									return true;
+								}
+								plugin.getConfiguration().createBook(meta);
+								sender.sendMessage(meta.getTitle() + " has been added to Lore's book library.");
 							}
-							return true;
+						} else if (!isPlayer) {
+							sender.sendMessage("You must be logged in to perform that command!");
 						}
-						return false;
+						return true;
 
 					case "remove":
-						if (args.length >= 1) {
+						if (args.length > 2) {
 							if (isPlayer && player.hasPermission("lore.command.remove")) {
 								if (plugin.getConfiguration().verifyBook(args[1])) {
 									plugin.getConfiguration().removeBook(args[1]);
@@ -110,9 +109,11 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "join":
-						if (args.length >= 2) {
+						if (args.length > 2) {
 							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.join.add")) {
-								if (plugin.getConfiguration().addJoinBook(args[2])) {
+								if (!plugin.getConfiguration().verifyBook(args[2])) {
+									sender.sendMessage(args[2] + " does not exist in Lore's library.");
+								} else if (plugin.getConfiguration().addJoinBook(args[2])) {
 									sender.sendMessage(args[2] + " was added to join list.");
 								} else {
 									sender.sendMessage(args[2] + " is already on the join list.");
@@ -131,9 +132,11 @@ public class LoreCommands implements CommandExecutor {
 						return false;
 
 					case "respawn":
-						if (args.length >= 2) {
+						if (args.length > 2) {
 							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.respawn.add")) {
-								if (plugin.getConfiguration().addRespawnBook(args[2])) {
+								if (!plugin.getConfiguration().verifyBook(args[2])) {
+									sender.sendMessage(args[2] + " does not exist in Lore's library.");
+								} else if (plugin.getConfiguration().addRespawnBook(args[2])) {
 									sender.sendMessage(args[2] + " was added to respawn list.");
 								} else {
 									sender.sendMessage(args[2] + " is already on the respawn list.");
@@ -151,7 +154,7 @@ public class LoreCommands implements CommandExecutor {
 						}
 						return false;
 				}
-				return true;
+				return false;
 			}
 		}
 		return false;

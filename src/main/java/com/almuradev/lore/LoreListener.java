@@ -23,8 +23,11 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreListener implements Listener {
 	private final LorePlugin plugin;
@@ -65,6 +68,19 @@ public class LoreListener implements Listener {
 			}
 			if (player.hasPermission("lore.respawn.message") && receivedBook) {
 				player.sendMessage(plugin.getConfiguration().getRespawnMessage());
+			}
+		}
+	}
+
+	@EventHandler (priority = EventPriority.HIGHEST)
+	public void onInventoryClick(InventoryClickEvent event) {
+		if (plugin.getConfig().getBoolean("allow-villager-trades")) return;
+		if (event.getInventory().getType() == InventoryType.MERCHANT) {
+			if (event.getCurrentItem().getItemMeta() instanceof BookMeta) {
+				if (plugin.getConfiguration().verifyBook(((BookMeta) event.getCurrentItem().getItemMeta()).getTitle())) {
+					((Player) event.getWhoClicked()).sendMessage("Lore books are not allowed to be traded to villagers!");
+					event.setCancelled(true);
+				}
 			}
 		}
 	}

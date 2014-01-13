@@ -11,100 +11,47 @@ commands:
   lore:
     description: Commands to manage Lore.
     usage: |
-      /lore give [player] [book]
-      /lore create
+      /lore create [name]
       /lore remove [book]
-      /lore join add [book]
-      /lore join remove [book]
-      /lore respawn add [book]
-      /lore respawn remove [book]
-  lore give:
-    description: Gives the specified player a copy of the specified book from Lore's book library.
-    usage: /<command> [player] [book]
-    permission: lore.command.give
-    permission-message: You do not have permission to use this command.
-  lore create:
-    description: Adds the held book to Lore's book library with the book's title as the name.
-    usage: /<command>
-    permission: lore.command.create
-    permission-message: You do not have permission to use this command.
-  lore remove:
-    description: Removes the specified book from Lore's book library.
-    usage: /<command> [book]
-    permission: lore.command.remove
-    permission-message: You do not have permission to use this command.
-  lore join add:
-    description: Adds the specified book to the join list in the config.yml.
-    usage: /<command> [book]
-    permission: lore.command.join.add
-    permission-message: You do not have permission to use this command.
-  lore join remove:
-    description: Removes the specified book from the join list in the config.yml.
-    usage: /<command> [book]
-    permission: lore.command.join.remove
-    permission-message: You do not have permission to use this command.
-  lore respawn add:
-    description: Adds the specified book to the respawn list in the config.yml.
-    usage: /<command> [book]
-    permission: lore.command.respawn.add
-    permission-message: You do not have permission to use this command.
-  lore respawn remove:
-    description: Removes the specified book from the respawn list in the config.yml.
-    usage: /<command> [book]
-    permission: lore.command.respawn.remove
-    permission-message: You do not have permission to use this command.
+      /lore give [player] [book]
+      /lore join [book] [true|false]
+      /lore respawn [book] [true|false]
+      /lore stick [book] [true|false]
 
 permissions:
   lore.command.*:
     description: Combines all 'command' permissions under one wildcard.
     children:
-      lore.command.give: true
       lore.command.create: true
+      lore.command.give: true
+      lore.command.join: true
       lore.command.remove: true
-      lore.command.join.add: true
-      lore.command.join.remove: true
-      lore.command.respawn.add: true
-      lore.command.respawn.remove: true
-  lore.join.*:
-    description: Combines all the 'join' permissions under one wildcard.
-    children:
-      lore.join.obtain: true
-      lore.join.message: true
-  lore.respawn.*:
-    description: Combines all the 'respawn' permissions under one wildcard.
-    children:
-      lore.respawn.obtain: true
-      lore.respawn.message: true
+      lore.command.respawn: true
+      lore.command.sticky: true
+  lore.command.create:
+    description: Allows the player to add a new book to Lore's book library.
+    default: false
   lore.command.give:
     description: Allows the player to give any book to another player.
     default: false
-  lore.command.create:
-    description: Allows the player to add a new book to Lore's book library.
+  lore.command.join:
+    description: Allows the player to set the flag for "join" on Lore books.
     default: false
   lore.command.remove:
     description: Allows the player to remove a book from Lore's book library.
     default: false
-  lore.command.join.add:
-    description: Allows the player to add a book to the join book list.
+  lore.command.respawn:
+    description: Allows the player to set the flag for "respawn" on Lore books.
     default: false
-  lore.command.join.remove:
-    description: Allows the player to remove a book from the join book list.
-    default: false
-  lore.command.respawn.add:
-    description: Allows the player to add a book to the respawn book list.
-    default: false
-  lore.command.respawn.remove:
-    description: Allows the player to remove a book from the respawm book list.
+  lore.command.sticky:
+    description: Allows the player to set the flag for "sticky" on Lore books.
     default: false
   lore.join.obtain:
-    description: Allows the player to obtain all books in the join list upon first login.
-    default: false
-  lore.join.message:
-    description: Allows the player to receive the join message when receiving join books.
+    description: Allows the player to obtain all books with the "join" flag set as true.
     default: false
   lore.respawn.obtain:
-    description: Allows the player to obtain all books in the respawn list upon respawning.
+    description: Allows the player to obtain all books with the "respawn" flag set as true.
     default: false
-  lore.respawn.message:
-    description: Allows the player to receive the respawn message when receiving respawn books.
+  lore.sticky.bypass:
+    description: Allows the player to not be bound by the sticky status of a book.
     default: false

@@ -4,11 +4,13 @@ defaultTasks 'clean', 'build', 'licenseFormatMain'
 // Apply plugins
 apply plugin: 'java'
 apply plugin: 'license'
+apply plugin: 'eclipse'
+apply plugin: 'idea'
 
 // Basic project information
 group = 'com.almuradev'
 archivesBaseName = 'lore'
-version = '1.3-SNAPSHOT'
+version = '2.0'
 
 // Extended project information
 ext.mainClass = 'com.almuradev.lore.LorePlugin'
@@ -37,7 +39,7 @@ repositories {
     mavenCentral()
     maven {
         name = 'bukkit-repo'
-        url = 'http://repo.bukkit.org/content/groups/public'
+        url = 'http://repo.bukkit.org/content/groups/public/'
     }
 }
 
@@ -53,12 +55,12 @@ processResources {
         include 'LICENSE.txt'
     }
     filter ReplaceTokens, tokens: [
-        "name": project.name,
-        "version": version,
-        "description": project.ext.description,
-        "authors": organization,
-        "url": url,
-        "mainClass": mainClass
+            "name": project.name,
+            "version": version,
+            "description": project.ext.description,
+            "authors": organization,
+            "url": url,
+            "mainClass": mainClass
     ]
 }
 

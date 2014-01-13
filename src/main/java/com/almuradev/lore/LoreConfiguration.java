@@ -20,8 +20,15 @@
 package com.almuradev.lore;
 
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.DirectoryStream;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
 
 import org.bukkit.Material;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -29,172 +36,70 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreConfiguration {
-	private final LorePlugin plugin;
+    private final LorePlugin plugin;
 
-	public LoreConfiguration(LorePlugin plugin) {
-		this.plugin = plugin;
-	}
+    public LoreConfiguration(LorePlugin plugin) {
+        this.plugin = plugin;
+    }
 
-	public void init() {
-		// Verify that our config.yml exists
-		if (!new File(plugin.getDataFolder(), "config.yml").exists()) {
-			plugin.saveDefaultConfig();
-		}
+    public void init() {
+        // Check if the config.yml exists, if not then create it.
+        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "config.yml"))) {
+            plugin.saveDefaultConfig();
+        }
 
-		if (!new File(plugin.getDataFolder() + "/books/").exists()) {
-			try {
-				new File(plugin.getDataFolder() + "/books/").mkdir();
-			} catch (Exception e) {
-				plugin.getLogger().severe("Unable to create 'books' folder in basedir/plugins/Lore");
-				if (debugMode()) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
+        // Check if the books folder exists, if not then create it.
+        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "books"))) {
+            try {
+                Files.createDirectories(Paths.get(plugin.getDataFolder() + File.separator + "books"));
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while attempting to create a folder in Lore's plugin data folder.", e);
+            }
+        }
+    }
 
-	public boolean debugMode() {
-		return plugin.getConfig().getBoolean("debug");
-	}
+    public void save(String name, BookMeta meta) throws IOException {
+        Files.createFile(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"));
+        final YamlConfiguration bookConfig = getConfig(name);
+        bookConfig.set("title", meta.getTitle());
+        bookConfig.set("author", meta.getAuthor());
+        bookConfig.set("pages", meta.getPages());
+        bookConfig.set("respawn", false);
+        bookConfig.set("join", false);
+        bookConfig.set("sticky", false);
+        bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml").toFile());
+    }
 
-	public String getJoinMessage() {
-		if (!plugin.getConfig().getString("join.message").isEmpty()) {
-			return plugin.getConfig().getString("join.message");
-		}
-		return "";
-	}
+    public void delete(String name) throws IOException {
+        Files.delete(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"));
+    }
 
-	public List<String> getJoinBooks() {
-		return plugin.getConfig().getStringList("join.books");
-	}
+    public YamlConfiguration getConfig(String name) throws FileNotFoundException {
+        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"))) {
+            throw new FileNotFoundException();
+        }
+        return YamlConfiguration.loadConfiguration(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml").toFile());
+    }
 
-	public String getRespawnMessage() {
-		if (!plugin.getConfig().getString("respawn.message").isEmpty()) {
-			return plugin.getConfig().getString("respawn.message");
-		}
-		return "";
-	}
+    public ItemStack getItem(String name) throws NullPointerException, FileNotFoundException {
+        final ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
+        final BookMeta meta = (BookMeta) item.getItemMeta();
+        meta.setTitle(getConfig(name).getString("title"));
+        meta.setAuthor(getConfig(name).getString("author"));
+        meta.setPages(getConfig(name).getStringList("pages"));
+        item.setItemMeta(meta);
+        return item;
+    }
 
-	public List<String> getRespawnBooks() {
-		return plugin.getConfig().getStringList("respawn.books");
-	}
-
-	public ItemStack getBook(String name) {
-		YamlConfiguration bookConfig = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder() + "/books/" + name + ".yml"));
-		ItemStack book = new ItemStack(Material.WRITTEN_BOOK, 1);
-		BookMeta meta = (BookMeta) book.getItemMeta();
-
-		if (verifyBook(name)) {
-			if (bookConfig.getStringList("pages") != null && !bookConfig.getStringList("pages").isEmpty()) {
-				meta.setAuthor(bookConfig.getString("author"));
-				meta.setTitle(bookConfig.getString("title"));
-				meta.setPages(bookConfig.getStringList("pages"));
-				book.setItemMeta(meta);
-			} else {
-				plugin.getLogger().severe("Unable to obtain " + name + "\'s pages.");
-			}
-		}
-		return book;
-	}
-
-	public void createBook(BookMeta meta) {
-		// Make sure the book file exists
-		File bookFile = new File(plugin.getDataFolder() + "/books/" + meta.getTitle() + ".yml");
-		if (!verifyBook(meta.getTitle())) {
-			try {
-				bookFile.createNewFile();
-			} catch (IOException e) {
-				plugin.getLogger().severe("Unable to create " + meta.getTitle() + ".yml!");
-				if (debugMode()) {
-					e.printStackTrace();
-				}
-			}
-		}
-
-		// Get the configuration file for the book and add all the stuff
-		YamlConfiguration bookConfig = YamlConfiguration.loadConfiguration(bookFile);
-		bookConfig.set("author", meta.getAuthor());
-		bookConfig.set("title", meta.getTitle());
-		bookConfig.set("pages", meta.getPages());
-		try {
-			bookConfig.save(bookFile);
-		} catch (IOException e) {
-			plugin.getLogger().severe("Unable to save file for " + meta.getTitle() + ".");
-			if (debugMode()) {
-				e.printStackTrace();
-			}
-		}
-	}
-
-	public void removeBook(String name) {
-		if (verifyBook(name)) {
-			try {
-				new File(plugin.getDataFolder() + "/books/" + name + ".yml").delete();
-			} catch (Exception e) {
-				plugin.getLogger().severe("Unable to delete " + name + ".yml!");
-				if (debugMode()) {
-					e.printStackTrace();
-				}
-			}
-		}
-	}
-
-	public boolean addJoinBook(String name) {
-		List<String> joinBookList = plugin.getConfig().getConfigurationSection("join").getStringList("books");
-		if (!joinBookList.contains(name)) {
-			joinBookList.add(name);
-			plugin.getConfig().set("join.books", joinBookList);
-			plugin.getLogger().info(name + " has been added to the list of join books.");
-			plugin.saveConfig();
-			return true;
-		}
-		return false;
-	}
-
-	public boolean addRespawnBook(String name) {
-		List<String> respawnBookList = plugin.getConfig().getStringList("respawn.books");
-		if (!respawnBookList.contains(name)) {
-			respawnBookList.add(name);
-			plugin.getConfig().set("respawn.books", respawnBookList);
-			plugin.getConfig().getConfigurationSection("respawn").getStringList("books").add(name);
-			plugin.getLogger().info(name + " has been added to the list of respawn books.");
-			plugin.saveConfig();
-			return true;
-		}
-		return false;
-	}
-
-	public boolean removeJoinBook(String name) {
-		List<String> joinBookList = plugin.getConfig().getStringList("join.books");
-		if (joinBookList.contains(name)) {
-			joinBookList.remove(name);
-			plugin.getConfig().set("join.books", joinBookList);
-			plugin.getLogger().info(name + " has been removed from the list of join books.");
-			plugin.saveConfig();
-			return true;
-		}
-		return false;
-	}
-
-	public boolean removeRespawnBook(String name) {
-		List<String> respawnBookList = plugin.getConfig().getStringList("respawn.books");
-		if (respawnBookList.contains(name)) {
-			respawnBookList.remove(name);
-			plugin.getConfig().set("respawn.books", respawnBookList);
-			plugin.getLogger().info(name + " has been removed from the list of respawn books.");
-			plugin.saveConfig();
-			return true;
-		}
-		return false;
-	}
-
-	public boolean verifyBook(String name) {
-		if (new File(plugin.getDataFolder() + "/books/" + name + ".yml").exists()) {
-			if (debugMode()) {
-				plugin.getLogger().info(plugin.getDataFolder() + "/books/" + name + ".yml");
-			}
-			return true;
-		}
-		return false;
-	}
+    public List<String> getAvailableBooks() {
+        final List<String> availableBooksList = new ArrayList<>();
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(Paths.get(plugin.getDataFolder() + File.separator + "books"))) {
+            for (Path path : dirStream) {
+                availableBooksList.add(path.getFileName().toString().replace(".yml", ""));
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "There was an issue obtaining books from Lore's plugin data folder.", e);
+        }
+        return availableBooksList;
+    }
 }

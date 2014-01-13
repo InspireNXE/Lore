@@ -1,14 +1,11 @@
-join:
-  message: You've just received book(s) of lore.
-  books: []
-respawn:
-  message: You've just received book(s) of lore.
-  books: []
+# Messages shown to the player under certain circumstances.
+messages:
+  join: You've just received book(s) of lore.
+  permission: You do not have permission to perform that command.
+  respawn: You've just received book(s) of lore.
+  sticky: You are not allowed to get rid of that book!
+  villager: You are not allowed to trade that book to a villager!
 
 # When enabled this will allow players to trade books in Lore's library to villagers.
 # Default: false
 allow-villager-trades: false
-
-# When enabled this will print additional information to the console that could be useful for debugging purposes.
-# Default: false
-debug: false

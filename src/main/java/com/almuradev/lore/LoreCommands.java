@@ -19,144 +19,173 @@
  */
 package com.almuradev.lore;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Paths;
+import java.util.logging.Level;
+
 import org.bukkit.Bukkit;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreCommands implements CommandExecutor {
-	private final LorePlugin plugin;
+    private final LorePlugin plugin;
 
-	public LoreCommands(LorePlugin plugin) {
-		this.plugin = plugin;
-	}
+    public LoreCommands(LorePlugin plugin) {
+        this.plugin = plugin;
+    }
 
-	@Override
-	public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-		if (command.getName().equalsIgnoreCase("lore")) {
-			Player player = null;
-			Boolean isPlayer = false;
+    @Override
+    public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
+        Player player = null;
 
-			if (sender instanceof Player) {
-				isPlayer = true;
-				player = (Player) sender;
-			}
+        if (sender instanceof Player) {
+            player = (Player) sender;
+        }
+        if (args.length == 0) {
+            return false;
+        }
+        switch (args[0].toUpperCase()) {
+            case "CREATE":
+                if (player == null) {
+                    sender.sendMessage("Only players can perform this command.");
+                    return true;
+                }
+                if (args.length < 2) {
+                    return false;
+                }
+                if (!player.hasPermission("lore.command.create")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
+                    sender.sendMessage("You must hold a signed book with this command.");
+                } else {
+                    final BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
+                    try {
+                        plugin.getConfiguration().save(args[1], meta);
+                        sender.sendMessage(args[1] + " was added to the library.");
+                    } catch (FileAlreadyExistsException e) {
+                        sender.sendMessage(args[1] + " already exists in the library.");
+                    } catch (IOException e) {
+                        sender.sendMessage("There was an issue in adding this book to the library, please inform your server administrator.");
+                        plugin.getLogger().log(Level.SEVERE, "Unable to create " + args[1] + ".yml", e);
+                    }
+                }
+                return true;
 
-			if (args.length > 0) {
-				switch (args[0].toLowerCase()) {
-					case "give":
-						if (args.length > 2) {
-							if ((isPlayer && player.hasPermission("lore.command.give")) || !isPlayer) {
-								Player target = Bukkit.getPlayerExact(args[1]);
-								if (target != null) {
-									if (plugin.getConfiguration().verifyBook(args[2])) {
-										target.getInventory().addItem(plugin.getConfiguration().getBook(args[2]));
-									} else {
-										sender.sendMessage("Sorry, " + args[2] + " does not exist within Lore's book library.");
-										return true;
-									}
-									if (!target.getName().equals(sender.getName())) {
-										sender.sendMessage("You've given " + args[1] + " a copy of " + args[2] + ".");
-									} else {
-										sender.sendMessage("You've given yourself a copy of " + args[2] + ".");
-									}
-								} else {
-									sender.sendMessage("Unable to give " + args[1] + " a copy of " + args[2] + ", is that player online?");
-								}
-							}
-							return true;
-						}
-						return false;
+            case "GIVE":
+                if (args.length < 3) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission("lore.command.give")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                Player target = Bukkit.getPlayerExact(args[1]);
+                if (target == null) {
+                    sender.sendMessage(args[1] + " does not appear to be online.");
+                    return true;
+                }
+                try {
+                    if (player.getInventory().contains(plugin.getConfiguration().getItem(args[2]))) {
+                        sender.sendMessage(target.getName() + " already has a copy of " + args[2] + ".");
+                        return true;
+                    }
+                    target.getInventory().addItem(plugin.getConfiguration().getItem(args[2]));
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[2] + " does not exist in the library.");
+                } catch (NullPointerException e) {
+                    plugin.getLogger().log(Level.WARNING, "Unable to obtain ItemStack for " + args[2] + ".", e);
+                }
+                return true;
 
-					case "create":
-						if (isPlayer && player.hasPermission("lore.command.create")) {
-							if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
-								sender.sendMessage("Held item must be a signed book.");
-							} else {
-								BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
-								if (plugin.getConfiguration().verifyBook(meta.getTitle())) {
-									sender.sendMessage(meta.getTitle() + " already exists in Lore's book library.");
-									return true;
-								}
-								if (!meta.hasTitle()) {
-									sender.sendMessage("You must sign this book first before adding it to Lore's book library.");
-									return true;
-								}
-								plugin.getConfiguration().createBook(meta);
-								sender.sendMessage(meta.getTitle() + " has been added to Lore's book library.");
-							}
-						} else if (!isPlayer) {
-							sender.sendMessage("You must be logged in to perform that command!");
-						}
-						return true;
+            case "REMOVE":
+                if (args.length < 2) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission("lore.command.remove")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                try {
+                    plugin.getConfiguration().delete(args[1]);
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[1] + " does not exist in the library.");
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "Unable to delete " + args[1] + ".", e);
+                }
+                return true;
 
-					case "remove":
-						if (args.length > 2) {
-							if (isPlayer && player.hasPermission("lore.command.remove")) {
-								if (plugin.getConfiguration().verifyBook(args[1])) {
-									plugin.getConfiguration().removeBook(args[1]);
-									sender.sendMessage(args[1] + " has been removed from Lore's book library.");
-								} else {
-									sender.sendMessage(args[1] + " does not exist in Lore's book library.");
-								}
-							} else if (!isPlayer) {
-								sender.sendMessage("You must be logged in to perform that command!");
-							}
-							return true;
-						}
-						return false;
+            case "JOIN":
+                if (args.length < 3) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission("lore.command.join")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                try {
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    bookConfig.set("join", Boolean.parseBoolean(args[2]));
+                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    sender.sendMessage(args[1] + " has had the join flag set to " + Boolean.parseBoolean(args[2]) + ".");
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[1] + " does not exist in the library.");
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred when attempting to save " + args[1] + ".yml", e);
+                    sender.sendMessage("An error occurred when attempting to save " + args[1] + ".yml, please inform your server administrator.");
+                }
+                return true;
 
-					case "join":
-						if (args.length > 2) {
-							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.join.add")) {
-								if (!plugin.getConfiguration().verifyBook(args[2])) {
-									sender.sendMessage(args[2] + " does not exist in Lore's library.");
-								} else if (plugin.getConfiguration().addJoinBook(args[2])) {
-									sender.sendMessage(args[2] + " was added to join list.");
-								} else {
-									sender.sendMessage(args[2] + " is already on the join list.");
-								}
-							} else if (args[1].equalsIgnoreCase("remove") && isPlayer && player.hasPermission("lore.command.join.remove")) {
-								if (plugin.getConfiguration().removeJoinBook(args[2])) {
-									sender.sendMessage(args[2] + " was removed from the join list.");
-								} else {
-									sender.sendMessage(args[2] + " is not on the join list.");
-								}
-							} else if (!isPlayer) {
-								sender.sendMessage("You must be logged in to perform that command!");
-							}
-							return true;
-						}
-						return false;
+            case "RESPAWN":
+                if (args.length < 3) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission("lore.command.respawn")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                try {
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    bookConfig.set("respawn", Boolean.parseBoolean(args[2]));
+                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    sender.sendMessage(args[1] + " has had the respawn flag set to " + Boolean.parseBoolean(args[2]) + ".");
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[1] + " does not exist in the library.");
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred when attempting to save " + args[1] + ".yml", e);
+                    sender.sendMessage("An error occurred when attempting to save " + args[1] + ".yml, please inform your server administrator.");
+                }
+                return true;
 
-					case "respawn":
-						if (args.length > 2) {
-							if (args[1].equalsIgnoreCase("add") && isPlayer && player.hasPermission("lore.command.respawn.add")) {
-								if (!plugin.getConfiguration().verifyBook(args[2])) {
-									sender.sendMessage(args[2] + " does not exist in Lore's library.");
-								} else if (plugin.getConfiguration().addRespawnBook(args[2])) {
-									sender.sendMessage(args[2] + " was added to respawn list.");
-								} else {
-									sender.sendMessage(args[2] + " is already on the respawn list.");
-								}
-							} else if (args[1].equalsIgnoreCase("remove") && isPlayer && player.hasPermission("lore.command.respawn.remove")) {
-								if (plugin.getConfiguration().removeRespawnBook(args[2])) {
-									sender.sendMessage(args[2] + " was removed from the respawn list.");
-								} else {
-									sender.sendMessage(args[2] + " is not on the respawn list.");
-								}
-							} else if (!isPlayer) {
-								sender.sendMessage("You must be logged in to perform that command!");
-							}
-							return true;
-						}
-						return false;
-				}
-				return false;
-			}
-		}
-		return false;
-	}
+            case "STICKY":
+                if (args.length < 3) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission("lore.command.sticky")) {
+                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                    return true;
+                }
+                try {
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    bookConfig.set("sticky", Boolean.parseBoolean(args[2]));
+                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    sender.sendMessage(args[1] + " has had the sticky flag set to " + Boolean.parseBoolean(args[2]) + ".");
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[1] + " does not exist in the library.");
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred when attempting to save " + args[1] + ".yml", e);
+                    sender.sendMessage("An error occurred when attempting to save " + args[1] + ".yml, please inform your server administrator.");
+                }
+                return true;
+        }
+        return false;
+    }
 }

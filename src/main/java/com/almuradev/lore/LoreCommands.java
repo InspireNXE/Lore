@@ -23,6 +23,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.nio.file.FileAlreadyExistsException;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.logging.Level;
 
@@ -36,18 +37,25 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreCommands implements CommandExecutor {
     private final LorePlugin plugin;
+    private final Path BOOKS_PATH;
+    private final String CREATE_PERMISSION_KEY = "lore.command.create";
+    private final String GIVE_PERMISSION_KEY = "lore.command.give";
+    private final String JOIN_PERMISSION_KEY = "lore.command.join";
+    private final String PERMISSION_MESSAGE_KEY;
+    private final String REMOVE_PERMISSION_KEY = "lore.command.remove";
+    private final String RESPAWN_PERMISSION_KEY = "lore.command.respawn";
+    private final String STICKY_PERMISSION_KEY = "lore.command.sticky";
 
     public LoreCommands(LorePlugin plugin) {
         this.plugin = plugin;
+        BOOKS_PATH = Paths.get(plugin.getDataFolder() + File.separator + "books");
+        PERMISSION_MESSAGE_KEY = plugin.getConfig().getString("messages.permission");
     }
 
     @Override
     public boolean onCommand(CommandSender sender, Command command, String label, String[] args) {
-        Player player = null;
+        final Player player = sender instanceof Player ? (Player) sender : null;
 
-        if (sender instanceof Player) {
-            player = (Player) sender;
-        }
         if (args.length == 0) {
             return false;
         }
@@ -60,8 +68,10 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 2) {
                     return false;
                 }
-                if (!player.hasPermission("lore.command.create")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (!player.hasPermission(CREATE_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && !PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 if (!(player.getItemInHand().getItemMeta() instanceof BookMeta)) {
@@ -84,8 +94,10 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 3) {
                     return false;
                 }
-                if (player != null && !player.hasPermission("lore.command.give")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (player != null && !player.hasPermission(GIVE_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && !PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 Player target = Bukkit.getPlayerExact(args[1]);
@@ -94,11 +106,11 @@ public class LoreCommands implements CommandExecutor {
                     return true;
                 }
                 try {
-                    if (player.getInventory().contains(plugin.getConfiguration().getItem(args[2]))) {
+                    if (target.getInventory().contains(plugin.getConfiguration().getBookItem(args[2]))) {
                         sender.sendMessage(target.getName() + " already has a copy of " + args[2] + ".");
                         return true;
                     }
-                    target.getInventory().addItem(plugin.getConfiguration().getItem(args[2]));
+                    target.getInventory().addItem(plugin.getConfiguration().getBookItem(args[2]));
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[2] + " does not exist in the library.");
                 } catch (NullPointerException e) {
@@ -110,8 +122,10 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 2) {
                     return false;
                 }
-                if (player != null && !player.hasPermission("lore.command.remove")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (player != null && !player.hasPermission(REMOVE_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && !PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 try {
@@ -127,14 +141,16 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 3) {
                     return false;
                 }
-                if (player != null && !player.hasPermission("lore.command.join")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (player != null && !player.hasPermission(JOIN_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
                     bookConfig.set("join", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    bookConfig.save(Paths.get(BOOKS_PATH + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the join flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");
@@ -148,14 +164,16 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 3) {
                     return false;
                 }
-                if (player != null && !player.hasPermission("lore.command.respawn")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (player != null && !player.hasPermission(RESPAWN_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && !PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
                     bookConfig.set("respawn", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    bookConfig.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the respawn flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");
@@ -169,14 +187,16 @@ public class LoreCommands implements CommandExecutor {
                 if (args.length < 3) {
                     return false;
                 }
-                if (player != null && !player.hasPermission("lore.command.sticky")) {
-                    sender.sendMessage(plugin.getConfig().getString("messages.permission"));
+                if (player != null && !player.hasPermission(STICKY_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && !PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getConfig(args[1]);
+                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
                     bookConfig.set("sticky", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + args[1] + ".yml").toFile());
+                    bookConfig.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the sticky flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");

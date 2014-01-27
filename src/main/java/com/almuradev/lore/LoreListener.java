@@ -35,9 +35,24 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreListener implements Listener {
     private final LorePlugin plugin;
+    private final String JOIN_KEY = "join";
+    private final String JOIN_MESSAGE_KEY;
+    private final String JOIN_PERMISSION_KEY = "lore.join.obtain";
+    private final String RESPAWN_KEY = "respawn";
+    private final String RESPAWN_MESSAGE_KEY;
+    private final String RESPAWN_PERMISSION_KEY = "lore.respawn.obtain";
+    private final String STICKY_KEY = "sticky";
+    private final String STICKY_MESSAGE_KEY;
+    private final String STICKY_PERMISSION_KEY = "lore.sticky.bypass";
+    private final String VILLAGER_KEY = "allow-villager-trades";
+    private final String VILLAGER_MESSAGE_KEY;
 
     public LoreListener(LorePlugin plugin) {
         this.plugin = plugin;
+        JOIN_MESSAGE_KEY = plugin.getConfig().getString("messages.join");
+        RESPAWN_MESSAGE_KEY = plugin.getConfig().getString("messages.respawn");
+        STICKY_MESSAGE_KEY = plugin.getConfig().getString("messages.sticky");
+        VILLAGER_MESSAGE_KEY = plugin.getConfig().getString("messages.villager");
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
@@ -46,20 +61,22 @@ public class LoreListener implements Listener {
         if (player.hasPlayedBefore()) {
             return;
         }
-        if (!player.hasPermission("lore.join.obtain")) {
+        if (!player.hasPermission(JOIN_PERMISSION_KEY)) {
             return;
         }
         for (String book : plugin.getConfiguration().getAvailableBooks()) {
             try {
-                if (player.getInventory().contains(plugin.getConfiguration().getItem(book))) {
+                if (player.getInventory().contains(plugin.getConfiguration().getBookItem(book))) {
                     return;
                 }
-                if (plugin.getConfiguration().getConfig(book).getBoolean("join")) {
-                    player.getInventory().addItem(plugin.getConfiguration().getItem(book));
-                    player.sendMessage(plugin.getConfig().getString("messages.join"));
+                if (plugin.getConfiguration().getBookConfig(book).getBoolean(JOIN_KEY)) {
+                    player.getInventory().addItem(plugin.getConfiguration().getBookItem(book));
+                    if (JOIN_MESSAGE_KEY != null && !JOIN_MESSAGE_KEY.isEmpty()) {
+                        player.sendMessage(JOIN_MESSAGE_KEY);
+                    }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerJoinEvent.", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerJoinEvent", e);
             }
         }
     }
@@ -67,20 +84,22 @@ public class LoreListener implements Listener {
     @EventHandler (priority = EventPriority.HIGHEST)
     public void onPlayerRespawn(PlayerRespawnEvent event) {
         Player player = event.getPlayer();
-        if (!player.hasPermission("lore.respawn.obtain")) {
+        if (!player.hasPermission(RESPAWN_PERMISSION_KEY)) {
             return;
         }
         for (String book : plugin.getConfiguration().getAvailableBooks()) {
             try {
-                if (player.getInventory().contains(plugin.getConfiguration().getItem(book))) {
+                if (player.getInventory().contains(plugin.getConfiguration().getBookItem(book))) {
                     return;
                 }
-                if (plugin.getConfiguration().getConfig(book).getBoolean("respawn")) {
-                    player.getInventory().addItem(plugin.getConfiguration().getItem(book));
-                    player.sendMessage(plugin.getConfig().getString("messages.respawn"));
+                if (plugin.getConfiguration().getBookConfig(book).getBoolean(RESPAWN_KEY)) {
+                    player.getInventory().addItem(plugin.getConfiguration().getBookItem(book));
+                    if (RESPAWN_MESSAGE_KEY != null && !RESPAWN_MESSAGE_KEY.isEmpty()) {
+                        player.sendMessage(RESPAWN_MESSAGE_KEY);
+                    }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent.", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
             }
         }
     }
@@ -94,20 +113,22 @@ public class LoreListener implements Listener {
         if (!(event.getItemDrop().getItemStack().getItemMeta() instanceof BookMeta)) {
             return;
         }
-        if (player.hasPermission("lore.sticky.bypass")) {
+        if (player.hasPermission(STICKY_PERMISSION_KEY)) {
             return;
         }
         for (String book : plugin.getConfiguration().getAvailableBooks()) {
             try {
-                if (!plugin.getConfiguration().getConfig(book).getBoolean("sticky")) {
+                if (!plugin.getConfiguration().getBookConfig(book).getBoolean(STICKY_KEY)) {
                     return;
                 }
-                if (event.getItemDrop().getItemStack().getItemMeta().equals(plugin.getConfiguration().getItem(book).getItemMeta())) {
-                    player.sendMessage(plugin.getConfig().getString("messages.sticky"));
+                if (event.getItemDrop().getItemStack().getItemMeta().equals(plugin.getConfiguration().getBookItem(book).getItemMeta())) {
+                    if (STICKY_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
+                        player.sendMessage(STICKY_MESSAGE_KEY);
+                    }
                     event.setCancelled(true);
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent.", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
             }
         }
     }
@@ -130,25 +151,29 @@ public class LoreListener implements Listener {
         if (event.getInventory().getType() == InventoryType.PLAYER) {
             return;
         }
-        if (player.hasPermission("lore.sticky.bypass")) {
+        if (player.hasPermission(STICKY_PERMISSION_KEY)) {
             return;
         }
         for (String book : plugin.getConfiguration().getAvailableBooks()) {
             try {
-                if (!plugin.getConfiguration().getConfig(book).getBoolean("sticky") && event.getInventory().getType() != InventoryType.MERCHANT) {
+                if (!plugin.getConfiguration().getBookConfig(book).getBoolean("sticky") && event.getInventory().getType() != InventoryType.MERCHANT) {
                     return;
                 }
-                if (event.getCurrentItem().getItemMeta().equals(plugin.getConfiguration().getItem(book).getItemMeta())) {
+                if (event.getCurrentItem().getItemMeta().equals(plugin.getConfiguration().getBookItem(book).getItemMeta())) {
                     if (event.getInventory().getType() != InventoryType.MERCHANT) {
-                        player.sendMessage(plugin.getConfig().getString("messages.sticky"));
+                        if (STICKY_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
+                            player.sendMessage(STICKY_MESSAGE_KEY);
+                        }
                         event.setCancelled(true);
-                    } else if (event.getInventory().getType() == InventoryType.MERCHANT && !plugin.getConfig().getBoolean("allow-villager-trades")) {
-                        player.sendMessage(plugin.getConfig().getString("messages.villager"));
+                    } else if (event.getInventory().getType() == InventoryType.MERCHANT && !plugin.getConfig().getBoolean(VILLAGER_KEY)) {
+                        if (VILLAGER_MESSAGE_KEY != null && !VILLAGER_MESSAGE_KEY.isEmpty()) {
+                            player.sendMessage(VILLAGER_MESSAGE_KEY);
+                        }
                         event.setCancelled(true);
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent.", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
             }
         }
     }

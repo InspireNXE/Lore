@@ -37,68 +37,82 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreConfiguration {
     private final LorePlugin plugin;
+    private final Path CONFIG_PATH;
+    private final Path BOOKS_PATH;
 
     public LoreConfiguration(LorePlugin plugin) {
         this.plugin = plugin;
+        CONFIG_PATH = Paths.get(plugin.getDataFolder() + File.separator + "config.yml");
+        BOOKS_PATH = Paths.get(plugin.getDataFolder() + File.separator + "books");
     }
 
     public void init() {
         // Check if the config.yml exists, if not then create it.
-        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "config.yml"))) {
+        if (Files.notExists(CONFIG_PATH)) {
             plugin.saveDefaultConfig();
+            plugin.getConfig().set("messages.join", "You've just received book(s) of lore.");
+            plugin.getConfig().set("messages.permission", "You do not have permission to perform that command.");
+            plugin.getConfig().set("messages.respawn", "You've just received book(s) of lore.");
+            plugin.getConfig().set("messages.sticky", "You are not allowed to get rid of that book!");
+            plugin.getConfig().set("messages.villager", "You are not allowed to trade that book to a villager!");
+            plugin.saveConfig();
         }
 
         // Check if the books folder exists, if not then create it.
-        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "books"))) {
+        if (Files.notExists(BOOKS_PATH)) {
             try {
-                Files.createDirectories(Paths.get(plugin.getDataFolder() + File.separator + "books"));
+                Files.createDirectories(BOOKS_PATH);
             } catch (IOException e) {
-                plugin.getLogger().log(Level.SEVERE, "An error occurred while attempting to create a folder in Lore's plugin data folder.", e);
+                plugin.getLogger().log(Level.SEVERE, "An error occurred while attempting to create a folder in Lore's plugin data folder", e);
             }
         }
     }
 
     public void save(String name, BookMeta meta) throws IOException {
-        Files.createFile(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"));
-        final YamlConfiguration bookConfig = getConfig(name);
+        final Path bookPath = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
+        if (Files.notExists(bookPath)) {
+            Files.createFile(bookPath);
+        }
+        final YamlConfiguration bookConfig = getBookConfig(name);
         bookConfig.set("title", meta.getTitle());
         bookConfig.set("author", meta.getAuthor());
         bookConfig.set("pages", meta.getPages());
         bookConfig.set("respawn", false);
         bookConfig.set("join", false);
         bookConfig.set("sticky", false);
-        bookConfig.save(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml").toFile());
+        bookConfig.save(bookPath.toFile());
     }
 
     public void delete(String name) throws IOException {
-        Files.delete(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"));
+        Files.delete(Paths.get(BOOKS_PATH + File.separator + name + ".yml"));
     }
 
-    public YamlConfiguration getConfig(String name) throws FileNotFoundException {
-        if (!Files.exists(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml"))) {
+    public YamlConfiguration getBookConfig(String name) throws FileNotFoundException {
+        final Path bookPath = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
+        if (Files.notExists(bookPath)) {
             throw new FileNotFoundException();
         }
-        return YamlConfiguration.loadConfiguration(Paths.get(plugin.getDataFolder() + File.separator + "books" + File.separator + name + ".yml").toFile());
+        return YamlConfiguration.loadConfiguration(bookPath.toFile());
     }
 
-    public ItemStack getItem(String name) throws NullPointerException, FileNotFoundException {
+    public ItemStack getBookItem(String name) throws NullPointerException, FileNotFoundException {
         final ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
         final BookMeta meta = (BookMeta) item.getItemMeta();
-        meta.setTitle(getConfig(name).getString("title"));
-        meta.setAuthor(getConfig(name).getString("author"));
-        meta.setPages(getConfig(name).getStringList("pages"));
+        meta.setTitle(getBookConfig(name).getString("title"));
+        meta.setAuthor(getBookConfig(name).getString("author"));
+        meta.setPages(getBookConfig(name).getStringList("pages"));
         item.setItemMeta(meta);
         return item;
     }
 
     public List<String> getAvailableBooks() {
         final List<String> availableBooksList = new ArrayList<>();
-        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(Paths.get(plugin.getDataFolder() + File.separator + "books"))) {
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(BOOKS_PATH)) {
             for (Path path : dirStream) {
                 availableBooksList.add(path.getFileName().toString().replace(".yml", ""));
             }
         } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "There was an issue obtaining books from Lore's plugin data folder.", e);
+            plugin.getLogger().log(Level.SEVERE, "There was an issue obtaining books from Lore's plugin data folder", e);
         }
         return availableBooksList;
     }

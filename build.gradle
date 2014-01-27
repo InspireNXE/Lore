@@ -1,5 +1,5 @@
 // Default tasks
-defaultTasks 'clean', 'build', 'licenseFormatMain'
+defaultTasks 'licenseFormatMain', 'clean', 'build'
 
 // Apply plugins
 apply plugin: 'java'
@@ -10,7 +10,7 @@ apply plugin: 'idea'
 // Basic project information
 group = 'com.almuradev'
 archivesBaseName = 'lore'
-version = '2.0'
+version = '2.0.1'
 
 // Extended project information
 ext.mainClass = 'com.almuradev.lore.LorePlugin'
@@ -76,5 +76,6 @@ license {
     ext.license = license
     ext.inceptionYear = inceptionYear
     header rootProject.file('HEADER.txt')
+    ignoreFailures true
     strictCheck true
 }

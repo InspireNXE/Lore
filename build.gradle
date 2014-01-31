@@ -4,13 +4,11 @@ defaultTasks 'licenseFormatMain', 'clean', 'build'
 // Apply plugins
 apply plugin: 'java'
 apply plugin: 'license'
-apply plugin: 'eclipse'
-apply plugin: 'idea'
 
 // Basic project information
 group = 'com.almuradev'
 archivesBaseName = 'lore'
-version = '2.0.1'
+version = '2.0.2'
 
 // Extended project information
 ext.mainClass = 'com.almuradev.lore.LorePlugin'

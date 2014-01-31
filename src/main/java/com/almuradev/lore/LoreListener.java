@@ -20,6 +20,7 @@
 package com.almuradev.lore;
 
 import java.io.FileNotFoundException;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.entity.Player;
@@ -31,6 +32,7 @@ import org.bukkit.event.inventory.InventoryType;
 import org.bukkit.event.player.PlayerDropItemEvent;
 import org.bukkit.event.player.PlayerJoinEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreListener implements Listener {
@@ -56,57 +58,61 @@ public class LoreListener implements Listener {
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPlayerJoin(PlayerJoinEvent event) {
-        Player player = event.getPlayer();
+    private void onPlayerJoin(PlayerJoinEvent event) {
+        final Player player = event.getPlayer();
         if (player.hasPlayedBefore()) {
             return;
         }
         if (!player.hasPermission(JOIN_PERMISSION_KEY)) {
             return;
         }
-        for (String book : plugin.getConfiguration().getAvailableBooks()) {
+        for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
+            final String name = entry.getKey();
+            final ItemStack item = entry.getValue();
             try {
-                if (player.getInventory().contains(plugin.getConfiguration().getBookItem(book))) {
+                if (player.getInventory().contains(item)) {
                     return;
                 }
-                if (plugin.getConfiguration().getBookConfig(book).getBoolean(JOIN_KEY)) {
-                    player.getInventory().addItem(plugin.getConfiguration().getBookItem(book));
+                if (plugin.getConfiguration().getConfig(name).getBoolean(JOIN_KEY)) {
+                    player.getInventory().addItem(item);
                     if (JOIN_MESSAGE_KEY != null && !JOIN_MESSAGE_KEY.isEmpty()) {
                         player.sendMessage(JOIN_MESSAGE_KEY);
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerJoinEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerJoinEvent", e);
             }
         }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPlayerRespawn(PlayerRespawnEvent event) {
-        Player player = event.getPlayer();
+    private void onPlayerRespawn(PlayerRespawnEvent event) {
+        final Player player = event.getPlayer();
         if (!player.hasPermission(RESPAWN_PERMISSION_KEY)) {
             return;
         }
-        for (String book : plugin.getConfiguration().getAvailableBooks()) {
+        for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
+            final String name = entry.getKey();
+            final ItemStack item = entry.getValue();
             try {
-                if (player.getInventory().contains(plugin.getConfiguration().getBookItem(book))) {
+                if (player.getInventory().contains(item)) {
                     return;
                 }
-                if (plugin.getConfiguration().getBookConfig(book).getBoolean(RESPAWN_KEY)) {
-                    player.getInventory().addItem(plugin.getConfiguration().getBookItem(book));
+                if (plugin.getConfiguration().getConfig(name).getBoolean(RESPAWN_KEY)) {
+                    player.getInventory().addItem(item);
                     if (RESPAWN_MESSAGE_KEY != null && !RESPAWN_MESSAGE_KEY.isEmpty()) {
                         player.sendMessage(RESPAWN_MESSAGE_KEY);
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
             }
         }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onPlayerDropItem(PlayerDropItemEvent event) {
-        Player player = event.getPlayer();
+    private void onPlayerDropItem(PlayerDropItemEvent event) {
+        final Player player = event.getPlayer();
         if (event.getItemDrop() == null) {
             return;
         }
@@ -116,29 +122,28 @@ public class LoreListener implements Listener {
         if (player.hasPermission(STICKY_PERMISSION_KEY)) {
             return;
         }
-        for (String book : plugin.getConfiguration().getAvailableBooks()) {
+        for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
+            final String name = entry.getKey();
+            final ItemStack item = entry.getValue();
             try {
-                if (!plugin.getConfiguration().getBookConfig(book).getBoolean(STICKY_KEY)) {
+                if (!plugin.getConfiguration().getConfig(name).getBoolean(STICKY_KEY)) {
                     return;
                 }
-                if (event.getItemDrop().getItemStack().getItemMeta().equals(plugin.getConfiguration().getBookItem(book).getItemMeta())) {
-                    if (STICKY_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
+                if (event.getItemDrop().getItemStack().getItemMeta().equals(item.getItemMeta())) {
+                    if (STICKY_MESSAGE_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
                         player.sendMessage(STICKY_MESSAGE_KEY);
                     }
                     event.setCancelled(true);
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
             }
         }
     }
 
     @EventHandler (priority = EventPriority.HIGHEST)
-    public void onInventoryClick(InventoryClickEvent event) {
-        Player player = null;
-        if (event.getWhoClicked() instanceof Player) {
-            player = (Player) event.getWhoClicked();
-        }
+    private void onInventoryClick(InventoryClickEvent event) {
+        final Player player = event.getWhoClicked() instanceof Player ? (Player) event.getWhoClicked() : null;
         if (player == null) {
             return;
         }
@@ -154,14 +159,16 @@ public class LoreListener implements Listener {
         if (player.hasPermission(STICKY_PERMISSION_KEY)) {
             return;
         }
-        for (String book : plugin.getConfiguration().getAvailableBooks()) {
+        for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
+            final String name = entry.getKey();
+            final ItemStack item = entry.getValue();
             try {
-                if (!plugin.getConfiguration().getBookConfig(book).getBoolean("sticky") && event.getInventory().getType() != InventoryType.MERCHANT) {
+                if (!plugin.getConfiguration().getConfig(name).getBoolean("sticky") && event.getInventory().getType() != InventoryType.MERCHANT) {
                     return;
                 }
-                if (event.getCurrentItem().getItemMeta().equals(plugin.getConfiguration().getBookItem(book).getItemMeta())) {
+                if (event.getCurrentItem().getItemMeta().equals(item.getItemMeta())) {
                     if (event.getInventory().getType() != InventoryType.MERCHANT) {
-                        if (STICKY_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
+                        if (STICKY_MESSAGE_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
                             player.sendMessage(STICKY_MESSAGE_KEY);
                         }
                         event.setCancelled(true);
@@ -173,7 +180,7 @@ public class LoreListener implements Listener {
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + book + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
             }
         }
     }

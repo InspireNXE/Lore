@@ -33,6 +33,7 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreCommands implements CommandExecutor {
@@ -79,7 +80,7 @@ public class LoreCommands implements CommandExecutor {
                 } else {
                     final BookMeta meta = (BookMeta) player.getItemInHand().getItemMeta();
                     try {
-                        plugin.getConfiguration().save(args[1], meta);
+                        plugin.getConfiguration().create(args[1], meta);
                         sender.sendMessage(args[1] + " was added to the library.");
                     } catch (FileAlreadyExistsException e) {
                         sender.sendMessage(args[1] + " already exists in the library.");
@@ -106,13 +107,16 @@ public class LoreCommands implements CommandExecutor {
                     return true;
                 }
                 try {
-                    if (target.getInventory().contains(plugin.getConfiguration().getBookItem(args[2]))) {
+                    final ItemStack item = plugin.getConfiguration().getMap().get(args[2]);
+                    if (item == null) {
+                        sender.sendMessage(args[2] + " does not exist in the library.");
+                        return true;
+                    }
+                    if (target.getInventory().contains(item)) {
                         sender.sendMessage(target.getName() + " already has a copy of " + args[2] + ".");
                         return true;
                     }
-                    target.getInventory().addItem(plugin.getConfiguration().getBookItem(args[2]));
-                } catch (FileNotFoundException e) {
-                    sender.sendMessage(args[2] + " does not exist in the library.");
+                    target.getInventory().addItem(item);
                 } catch (NullPointerException e) {
                     plugin.getLogger().log(Level.WARNING, "Unable to obtain ItemStack for " + args[2] + ".", e);
                 }
@@ -148,9 +152,9 @@ public class LoreCommands implements CommandExecutor {
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
-                    bookConfig.set("join", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(BOOKS_PATH + args[1] + ".yml").toFile());
+                    final YamlConfiguration config = plugin.getConfiguration().getConfig(args[1]);
+                    config.set("join", Boolean.parseBoolean(args[2]));
+                    config.save(Paths.get(BOOKS_PATH + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the join flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");
@@ -171,9 +175,9 @@ public class LoreCommands implements CommandExecutor {
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
-                    bookConfig.set("respawn", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
+                    final YamlConfiguration config = plugin.getConfiguration().getConfig(args[1]);
+                    config.set("respawn", Boolean.parseBoolean(args[2]));
+                    config.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the respawn flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");
@@ -194,9 +198,9 @@ public class LoreCommands implements CommandExecutor {
                     return true;
                 }
                 try {
-                    final YamlConfiguration bookConfig = plugin.getConfiguration().getBookConfig(args[1]);
-                    bookConfig.set("sticky", Boolean.parseBoolean(args[2]));
-                    bookConfig.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
+                    final YamlConfiguration config = plugin.getConfiguration().getConfig(args[1]);
+                    config.set("sticky", Boolean.parseBoolean(args[2]));
+                    config.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
                     sender.sendMessage(args[1] + " has had the sticky flag set to " + Boolean.parseBoolean(args[2]) + ".");
                 } catch (FileNotFoundException e) {
                     sender.sendMessage(args[1] + " does not exist in the library.");

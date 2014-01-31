@@ -26,8 +26,9 @@ import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 
 import org.bukkit.Material;
@@ -37,6 +38,7 @@ import org.bukkit.inventory.meta.BookMeta;
 
 public class LoreConfiguration {
     private final LorePlugin plugin;
+    private final Map<String, ItemStack> BOOK_MAP = new HashMap<>();
     private final Path CONFIG_PATH;
     private final Path BOOKS_PATH;
 
@@ -46,7 +48,7 @@ public class LoreConfiguration {
         BOOKS_PATH = Paths.get(plugin.getDataFolder() + File.separator + "books");
     }
 
-    public void init() {
+    protected void init() {
         // Check if the config.yml exists, if not then create it.
         if (Files.notExists(CONFIG_PATH)) {
             plugin.saveDefaultConfig();
@@ -66,54 +68,63 @@ public class LoreConfiguration {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while attempting to create a folder in Lore's plugin data folder", e);
             }
         }
+
+        // Populate BOOK_MAP
+        populate();
     }
 
-    public void save(String name, BookMeta meta) throws IOException {
+    public void populate() {
+        BOOK_MAP.clear();
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(BOOKS_PATH)) {
+            for (Path path : dirStream) {
+                final String name = path.getFileName().toString().replace(".yml", "");
+                BOOK_MAP.put(name, getItem(name));
+            }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.SEVERE, "There was an issue obtaining books from Lore's plugin data folder", e);
+        }
+    }
+
+    public void create(String name, BookMeta meta) throws IOException {
         final Path bookPath = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
         if (Files.notExists(bookPath)) {
             Files.createFile(bookPath);
         }
-        final YamlConfiguration bookConfig = getBookConfig(name);
-        bookConfig.set("title", meta.getTitle());
-        bookConfig.set("author", meta.getAuthor());
-        bookConfig.set("pages", meta.getPages());
-        bookConfig.set("respawn", false);
-        bookConfig.set("join", false);
-        bookConfig.set("sticky", false);
-        bookConfig.save(bookPath.toFile());
+        final YamlConfiguration config = getConfig(name);
+        config.set("title", meta.getTitle());
+        config.set("author", meta.getAuthor());
+        config.set("pages", meta.getPages());
+        config.set("respawn", false);
+        config.set("join", false);
+        config.set("sticky", false);
+        config.save(bookPath.toFile());
+        BOOK_MAP.put(name, getItem(name));
     }
 
     public void delete(String name) throws IOException {
         Files.delete(Paths.get(BOOKS_PATH + File.separator + name + ".yml"));
     }
 
-    public YamlConfiguration getBookConfig(String name) throws FileNotFoundException {
-        final Path bookPath = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
-        if (Files.notExists(bookPath)) {
+    public YamlConfiguration getConfig(String name) throws FileNotFoundException {
+        final Path path = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
+        if (Files.notExists(path)) {
             throw new FileNotFoundException();
         }
-        return YamlConfiguration.loadConfiguration(bookPath.toFile());
+        return YamlConfiguration.loadConfiguration(path.toFile());
     }
 
-    public ItemStack getBookItem(String name) throws NullPointerException, FileNotFoundException {
+    public ItemStack getItem(String name) throws NullPointerException, FileNotFoundException {
         final ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
         final BookMeta meta = (BookMeta) item.getItemMeta();
-        meta.setTitle(getBookConfig(name).getString("title"));
-        meta.setAuthor(getBookConfig(name).getString("author"));
-        meta.setPages(getBookConfig(name).getStringList("pages"));
+        final YamlConfiguration config = getConfig(name);
+        meta.setTitle(config.getString("title"));
+        meta.setAuthor(config.getString("author"));
+        meta.setPages(config.getStringList("pages"));
         item.setItemMeta(meta);
         return item;
     }
 
-    public List<String> getAvailableBooks() {
-        final List<String> availableBooksList = new ArrayList<>();
-        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(BOOKS_PATH)) {
-            for (Path path : dirStream) {
-                availableBooksList.add(path.getFileName().toString().replace(".yml", ""));
-            }
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.SEVERE, "There was an issue obtaining books from Lore's plugin data folder", e);
-        }
-        return availableBooksList;
+    public Map<String, ItemStack> getMap() {
+        return Collections.unmodifiableMap(BOOK_MAP);
     }
 }

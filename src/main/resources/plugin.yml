@@ -12,9 +12,10 @@ commands:
     description: Commands to manage Lore.
     usage: |
       /lore create [name]
-      /lore remove [book]
       /lore give [player] [book]
       /lore join [book] [true|false]
+      /lore list
+      /lore remove [book]
       /lore respawn [book] [true|false]
       /lore stick [book] [true|false]
 
@@ -25,6 +26,7 @@ permissions:
       lore.command.create: true
       lore.command.give: true
       lore.command.join: true
+      lore.command.list: true
       lore.command.remove: true
       lore.command.respawn: true
       lore.command.sticky: true
@@ -39,6 +41,9 @@ permissions:
     default: false
   lore.command.remove:
     description: Allows the player to remove a book from Lore's book library.
+    default: false
+  lore.command.list:
+    description: Displays a list of registered books to the command sender.
     default: false
   lore.command.respawn:
     description: Allows the player to set the flag for "respawn" on Lore books.

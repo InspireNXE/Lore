@@ -42,6 +42,7 @@ public class LoreCommands implements CommandExecutor {
     private final String CREATE_PERMISSION_KEY = "lore.command.create";
     private final String GIVE_PERMISSION_KEY = "lore.command.give";
     private final String JOIN_PERMISSION_KEY = "lore.command.join";
+    private final String LIST_PERMISSION_KEY = "lore.command.list";
     private final String PERMISSION_MESSAGE_KEY;
     private final String REMOVE_PERMISSION_KEY = "lore.command.remove";
     private final String RESPAWN_PERMISSION_KEY = "lore.command.respawn";
@@ -122,6 +123,39 @@ public class LoreCommands implements CommandExecutor {
                 }
                 return true;
 
+            case "JOIN":
+                if (args.length < 3) {
+                    return false;
+                }
+                if (player != null && !player.hasPermission(JOIN_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
+                    return true;
+                }
+                try {
+                    final YamlConfiguration config = plugin.getConfiguration().getConfig(args[1]);
+                    config.set("join", Boolean.parseBoolean(args[2]));
+                    config.save(Paths.get(BOOKS_PATH + File.separator + args[1] + ".yml").toFile());
+                    sender.sendMessage(args[1] + " has had the join flag set to " + Boolean.parseBoolean(args[2]) + ".");
+                } catch (FileNotFoundException e) {
+                    sender.sendMessage(args[1] + " does not exist in the library.");
+                } catch (IOException e) {
+                    plugin.getLogger().log(Level.SEVERE, "An error occurred when attempting to save " + args[1] + ".yml", e);
+                    sender.sendMessage("An error occurred when attempting to save " + args[1] + ".yml, please inform your server administrator.");
+                }
+                return true;
+
+            case "LIST":
+                if (player != null && !player.hasPermission(JOIN_PERMISSION_KEY)) {
+                    if (PERMISSION_MESSAGE_KEY != null && PERMISSION_MESSAGE_KEY.isEmpty()) {
+                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
+                    }
+                    return true;
+                }
+                sender.sendMessage("Registered books of lore: " + plugin.getConfiguration().getMap().keySet().toString().replace("[", "").replace("]", "").trim());
+                return true;
+
             case "REMOVE":
                 if (args.length < 2) {
                     return false;
@@ -138,29 +172,6 @@ public class LoreCommands implements CommandExecutor {
                     sender.sendMessage(args[1] + " does not exist in the library.");
                 } catch (IOException e) {
                     plugin.getLogger().log(Level.SEVERE, "Unable to delete " + args[1] + ".", e);
-                }
-                return true;
-
-            case "JOIN":
-                if (args.length < 3) {
-                    return false;
-                }
-                if (player != null && !player.hasPermission(JOIN_PERMISSION_KEY)) {
-                    if (PERMISSION_MESSAGE_KEY != null && PERMISSION_MESSAGE_KEY.isEmpty()) {
-                        sender.sendMessage(PERMISSION_MESSAGE_KEY);
-                    }
-                    return true;
-                }
-                try {
-                    final YamlConfiguration config = plugin.getConfiguration().getConfig(args[1]);
-                    config.set("join", Boolean.parseBoolean(args[2]));
-                    config.save(Paths.get(BOOKS_PATH + args[1] + ".yml").toFile());
-                    sender.sendMessage(args[1] + " has had the join flag set to " + Boolean.parseBoolean(args[2]) + ".");
-                } catch (FileNotFoundException e) {
-                    sender.sendMessage(args[1] + " does not exist in the library.");
-                } catch (IOException e) {
-                    plugin.getLogger().log(Level.SEVERE, "An error occurred when attempting to save " + args[1] + ".yml", e);
-                    sender.sendMessage("An error occurred when attempting to save " + args[1] + ".yml, please inform your server administrator.");
                 }
                 return true;
 

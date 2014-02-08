@@ -17,7 +17,7 @@ commands:
       /lore list
       /lore remove [book]
       /lore respawn [book] [true|false]
-      /lore stick [book] [true|false]
+      /lore sticky [book] [true|false]
 
 permissions:
   lore.command.*:

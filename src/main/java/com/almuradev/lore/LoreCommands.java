@@ -147,7 +147,7 @@ public class LoreCommands implements CommandExecutor {
                 return true;
 
             case "LIST":
-                if (player != null && !player.hasPermission(JOIN_PERMISSION_KEY)) {
+                if (player != null && !player.hasPermission(LIST_PERMISSION_KEY)) {
                     if (PERMISSION_MESSAGE_KEY != null && PERMISSION_MESSAGE_KEY.isEmpty()) {
                         sender.sendMessage(PERMISSION_MESSAGE_KEY);
                     }

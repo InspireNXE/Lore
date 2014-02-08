@@ -8,7 +8,7 @@ apply plugin: 'license'
 // Basic project information
 group = 'com.almuradev'
 archivesBaseName = 'lore'
-version = '2.1.0'
+version = '2.1.1'
 
 // Extended project information
 ext.mainClass = 'com.almuradev.lore.LorePlugin'
@@ -29,7 +29,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.6.0'
+        classpath 'nl.javadude.gradle.plugins:license-gradle-plugin:0.7.0'
     }
 }
 

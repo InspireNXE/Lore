@@ -1,11 +1,27 @@
-# Messages shown to the player under certain circumstances.
+# allow-villager-trades:
+#     options: true/false
+#     default: false
+#     description: When true, players can trade Lore books to villagers (if the book is not sticky).
+# messages:
+#   join:
+#       options: Any valid string, if left blank then no message is sent.
+#       description: The message sent to the player when they first join and receive a book from Lore.
+#   permission:
+#       options: Any valid string, if left blank then no message is sent.
+#       description: The message sent to the player when they attempt to use a lore command that they have no permission for.
+#   respawn:
+#       options: Any valid string, if left blank then no message is sent.
+#       description: The message sent to the player when they respawn and receive a book from Lore.
+#   sticky:
+#       options: Any valid string, if left blank then no message is sent.
+#       description: The message sent to the player when they attempt to move a sticky book outside of the inventory.
+#   villager:
+#       options: Any valid string, if left blank then no message is sent.
+#       description: The message sent to the player when they attempt to trade a Lore book to a villager (only if allow-villager-trades is set to true)
+allow-villager-trades: false
 messages:
   join:
   permission:
   respawn:
   sticky:
   villager:
-
-# When enabled this will allow players to trade books in Lore's library to villagers.
-# Default: false
-allow-villager-trades: false

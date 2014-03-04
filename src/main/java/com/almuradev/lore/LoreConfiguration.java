@@ -39,18 +39,19 @@ import org.bukkit.inventory.meta.BookMeta;
 public class LoreConfiguration {
     private final LorePlugin plugin;
     private final Map<String, ItemStack> BOOK_MAP = new HashMap<>();
-    private final Path CONFIG_PATH;
-    private final Path BOOKS_PATH;
+    private final Path configPath;
+    private final Path booksPath;
 
     public LoreConfiguration(LorePlugin plugin) {
         this.plugin = plugin;
-        CONFIG_PATH = Paths.get(plugin.getDataFolder() + File.separator + "config.yml");
-        BOOKS_PATH = Paths.get(plugin.getDataFolder() + File.separator + "books");
+        configPath = Paths.get(plugin.getDataFolder() + File.separator + "config.yml");
+        booksPath = Paths.get(plugin.getDataFolder() + File.separator + "books");
     }
 
     protected void init() {
         // Check if the config.yml exists, if not then create it.
-        if (Files.notExists(CONFIG_PATH)) {
+        if (Files.notExists(configPath)) {
+            plugin.getLogger().info("config.yml was not found, creating default.");
             plugin.saveDefaultConfig();
             plugin.getConfig().set("messages.join", "You've just received book(s) of lore.");
             plugin.getConfig().set("messages.permission", "You do not have permission to perform that command.");
@@ -61,9 +62,9 @@ public class LoreConfiguration {
         }
 
         // Check if the books folder exists, if not then create it.
-        if (Files.notExists(BOOKS_PATH)) {
+        if (Files.notExists(booksPath)) {
             try {
-                Files.createDirectories(BOOKS_PATH);
+                Files.createDirectories(booksPath);
             } catch (IOException e) {
                 plugin.getLogger().log(Level.SEVERE, "An error occurred while attempting to create a folder in Lore's plugin data folder", e);
             }
@@ -75,9 +76,9 @@ public class LoreConfiguration {
 
     public void populate() {
         BOOK_MAP.clear();
-        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(BOOKS_PATH)) {
+        try (DirectoryStream<Path> dirStream = Files.newDirectoryStream(booksPath)) {
             for (Path path : dirStream) {
-                final String name = path.getFileName().toString().replace(".yml", "");
+                final String name = path.getFileName().toString().replace(".yml", "").toLowerCase();
                 BOOK_MAP.put(name, getItem(name));
             }
         } catch (IOException e) {
@@ -86,11 +87,9 @@ public class LoreConfiguration {
     }
 
     public void create(String name, BookMeta meta) throws IOException {
-        final Path bookPath = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
-        if (Files.notExists(bookPath)) {
-            Files.createFile(bookPath);
-        }
-        final YamlConfiguration config = getConfig(name);
+        final Path bookPath = Paths.get(booksPath + File.separator + name.toLowerCase() + ".yml");
+        Files.createFile(bookPath);
+        final YamlConfiguration config = getConfig(name.toLowerCase());
         config.set("title", meta.getTitle());
         config.set("author", meta.getAuthor());
         config.set("pages", meta.getPages());
@@ -98,15 +97,16 @@ public class LoreConfiguration {
         config.set("join", false);
         config.set("sticky", false);
         config.save(bookPath.toFile());
-        BOOK_MAP.put(name, getItem(name));
+        BOOK_MAP.put(name.toLowerCase(), getItem(name.toLowerCase()));
     }
 
     public void delete(String name) throws IOException {
-        Files.delete(Paths.get(BOOKS_PATH + File.separator + name + ".yml"));
+        Files.delete(Paths.get(booksPath + File.separator + name.toLowerCase() + ".yml"));
+        BOOK_MAP.remove(name.toLowerCase());
     }
 
     public YamlConfiguration getConfig(String name) throws FileNotFoundException {
-        final Path path = Paths.get(BOOKS_PATH + File.separator + name + ".yml");
+        final Path path = Paths.get(booksPath + File.separator + name.toLowerCase() + ".yml");
         if (Files.notExists(path)) {
             throw new FileNotFoundException();
         }
@@ -116,7 +116,7 @@ public class LoreConfiguration {
     public ItemStack getItem(String name) throws NullPointerException, FileNotFoundException {
         final ItemStack item = new ItemStack(Material.WRITTEN_BOOK, 1);
         final BookMeta meta = (BookMeta) item.getItemMeta();
-        final YamlConfiguration config = getConfig(name);
+        final YamlConfiguration config = getConfig(name.toLowerCase());
         meta.setTitle(config.getString("title"));
         meta.setAuthor(config.getString("author"));
         meta.setPages(config.getStringList("pages"));

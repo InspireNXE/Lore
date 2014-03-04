@@ -8,7 +8,7 @@ apply plugin: 'license'
 // Basic project information
 group = 'com.almuradev'
 archivesBaseName = 'lore'
-version = '2.1.2'
+version = '2.2'
 
 // Extended project information
 ext.mainClass = 'com.almuradev.lore.LorePlugin'
@@ -43,23 +43,20 @@ repositories {
 
 // Dependencies for compilation and testing
 dependencies {
-    compile 'org.bukkit:bukkit:1.7.2-R0.3-SNAPSHOT'
+    compile 'org.bukkit:bukkit:1.7.2-R0.4-SNAPSHOT'
 }
 
 // Include resources in final JAR
-import org.apache.tools.ant.filters.*
 processResources {
     from(rootProject.rootDir) {
         include 'LICENSE.txt'
     }
-    filter ReplaceTokens, tokens: [
-            "name": project.name,
-            "version": version,
-            "description": project.ext.description,
-            "authors": organization,
-            "url": url,
-            "mainClass": mainClass
-    ]
+    expand 'name': project.name,
+            'version': version,
+            'description': project.ext.description,
+            'authors': organization,
+            'url': url,
+            'mainClass': mainClass
 }
 
 // License header formatting

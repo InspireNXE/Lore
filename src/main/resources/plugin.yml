@@ -1,10 +1,10 @@
-name: @name@
-version: @version@
-description: @description@
-author: @authors@
-website: @url@
+name: ${name}
+version: ${version}
+description: ${description}
+author: ${authors}
+website: ${url}
 
-main: @mainClass@
+main: ${mainClass}
 load: POSTWORLD
 
 commands:
@@ -18,6 +18,8 @@ commands:
       /lore remove [book]
       /lore respawn [book] [true|false]
       /lore sticky [book] [true|false]
+      /lore unsign
+      /lore update [name]
 
 permissions:
   lore.command.*:
@@ -30,8 +32,10 @@ permissions:
       lore.command.remove: true
       lore.command.respawn: true
       lore.command.sticky: true
+      lore.command.unsign: true
+      lore.command.update: true
   lore.command.create:
-    description: Allows the player to add a new book to Lore's book library.
+    description: Allows the player to add a new book to the book library.
     default: false
   lore.command.give:
     description: Allows the player to give any book to another player.
@@ -50,6 +54,12 @@ permissions:
     default: false
   lore.command.sticky:
     description: Allows the player to set the flag for "sticky" on Lore books.
+    default: false
+  lore.command.unsign:
+    description: Allows the player to turn a signed book into an unsigned book.
+    default: false
+  lore.command.update:
+    description: Allows the player to update an existing book in the book library.
     default: false
   lore.join.obtain:
     description: Allows the player to obtain all books with the "join" flag set as true.

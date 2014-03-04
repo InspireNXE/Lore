@@ -23,6 +23,7 @@ import java.io.FileNotFoundException;
 import java.util.Map;
 import java.util.logging.Level;
 
+import org.bukkit.ChatColor;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -80,7 +81,7 @@ public class LoreListener implements Listener {
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerJoinEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + ChatColor.GREEN + name.toLowerCase() + ChatColor.RESET + " during PlayerJoinEvent", e);
             }
         }
     }
@@ -105,12 +106,12 @@ public class LoreListener implements Listener {
                     }
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + ChatColor.GREEN + name.toLowerCase() + ChatColor.RESET + " during PlayerRespawnEvent", e);
             }
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.LOWEST)
     private void onPlayerDropItem(PlayerDropItemEvent event) {
         final Player player = event.getPlayer();
         if (event.getItemDrop() == null) {
@@ -124,24 +125,25 @@ public class LoreListener implements Listener {
         }
         for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
             final String name = entry.getKey();
-            final ItemStack item = entry.getValue();
             try {
                 if (!plugin.getConfiguration().getConfig(name).getBoolean(STICKY_KEY)) {
-                    return;
+                    continue;
                 }
-                if (event.getItemDrop().getItemStack().getItemMeta().equals(item.getItemMeta())) {
+                final ItemStack item = entry.getValue();
+                if (item.getItemMeta().equals(event.getItemDrop().getItemStack().getItemMeta())) {
                     if (STICKY_MESSAGE_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
                         player.sendMessage(STICKY_MESSAGE_KEY);
                     }
                     event.setCancelled(true);
+                    break;
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + ChatColor.GREEN + name.toLowerCase() + ChatColor.RESET + " during PlayerDropItemEvent", e);
             }
         }
     }
 
-    @EventHandler (priority = EventPriority.HIGHEST)
+    @EventHandler (priority = EventPriority.LOWEST)
     private void onInventoryClick(InventoryClickEvent event) {
         final Player player = event.getWhoClicked() instanceof Player ? (Player) event.getWhoClicked() : null;
         if (player == null) {
@@ -153,34 +155,34 @@ public class LoreListener implements Listener {
         if (!(event.getCurrentItem().getItemMeta() instanceof BookMeta)) {
             return;
         }
-        if (event.getInventory().getType() == InventoryType.PLAYER) {
+        if (player.hasPermission(STICKY_PERMISSION_KEY)) {
             return;
         }
-        if (player.hasPermission(STICKY_PERMISSION_KEY)) {
+        final InventoryType type = event.getInventory().getType();
+        if (type != InventoryType.CHEST && type != InventoryType.DISPENSER && type != InventoryType.DROPPER && type != InventoryType.ENDER_CHEST && type != InventoryType.HOPPER && type != InventoryType.MERCHANT) {
             return;
         }
         for (Map.Entry<String, ItemStack> entry : plugin.getConfiguration().getMap().entrySet()) {
             final String name = entry.getKey();
-            final ItemStack item = entry.getValue();
             try {
-                if (!plugin.getConfiguration().getConfig(name).getBoolean("sticky") && event.getInventory().getType() != InventoryType.MERCHANT) {
-                    return;
+                if (!plugin.getConfiguration().getConfig(name).getBoolean(STICKY_KEY)) {
+                    continue;
                 }
-                if (event.getCurrentItem().getItemMeta().equals(item.getItemMeta())) {
-                    if (event.getInventory().getType() != InventoryType.MERCHANT) {
-                        if (STICKY_MESSAGE_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
-                            player.sendMessage(STICKY_MESSAGE_KEY);
-                        }
-                        event.setCancelled(true);
-                    } else if (event.getInventory().getType() == InventoryType.MERCHANT && !plugin.getConfig().getBoolean(VILLAGER_KEY)) {
+                final ItemStack item = entry.getValue();
+                if (item.getItemMeta().equals(event.getCurrentItem().getItemMeta())) {
+                    if (type == InventoryType.MERCHANT && !plugin.getConfig().getBoolean(VILLAGER_KEY)) {
                         if (VILLAGER_MESSAGE_KEY != null && !VILLAGER_MESSAGE_KEY.isEmpty()) {
                             player.sendMessage(VILLAGER_MESSAGE_KEY);
                         }
-                        event.setCancelled(true);
+                    } else {
+                        if (STICKY_MESSAGE_KEY != null && !STICKY_MESSAGE_KEY.isEmpty()) {
+                            player.sendMessage(STICKY_MESSAGE_KEY);
+                        }
                     }
+                    event.setCancelled(true);
                 }
             } catch (FileNotFoundException e) {
-                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + name + " during PlayerRespawnEvent", e);
+                plugin.getLogger().log(Level.WARNING, "An error occurred while attempting to fetch " + ChatColor.GREEN + name.toLowerCase() + ChatColor.RESET + " during InventoryClickEvent", e);
             }
         }
     }
